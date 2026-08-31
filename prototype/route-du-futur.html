@@ -1,0 +1,907 @@
+<title>Route du Futur</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --bg:#F7F7F2; --surface:#FFFFFF; --surface-2:#F0F0EA;
+    --ink:#3C3B33; --ink-muted:#8B8A7E; --line:#E7E6DC;
+    --primary:#1477F2; --primary-b:#0F5FC4; --primary-ink:#FFFFFF; --primary-soft:#E5F0FF;
+    --ok:#58CC02; --ok-b:#46A302; --ok-bg:#EAF9D9;
+    --warn:#FF9600; --warn-b:#CC7A00; --warn-bg:#FFEFDA;
+    --stretch:#CE82FF; --stretch-b:#A25CDB; --stretch-bg:#F6EAFF;
+    --danger:#FF4B4B; --danger-b:#D63333; --danger-bg:#FFE7E7;
+    --scrim:rgba(60,59,51,.4);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#1C1D17; --surface:#25261E; --surface-2:#2C2D23;
+      --ink:#F1F0E6; --ink-muted:#A6A497; --line:#3A3B30;
+      --primary:#5B9FFF; --primary-b:#3A7EE0; --primary-ink:#0E1420; --primary-soft:#233350;
+      --ok:#7ADB3B; --ok-b:#58B31C; --ok-bg:#26351A;
+      --warn:#FFA733; --warn-b:#D6860E; --warn-bg:#3A2A14;
+      --stretch:#D99BFF; --stretch-b:#B575E8; --stretch-bg:#332040;
+      --danger:#FF7070; --danger-b:#DE4B4B; --danger-bg:#3A1E1E;
+      --scrim:rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1C1D17; --surface:#25261E; --surface-2:#2C2D23;
+    --ink:#F1F0E6; --ink-muted:#A6A497; --line:#3A3B30;
+    --primary:#5B9FFF; --primary-b:#3A7EE0; --primary-ink:#0E1420; --primary-soft:#233350;
+    --ok:#7ADB3B; --ok-b:#58B31C; --ok-bg:#26351A;
+    --warn:#FFA733; --warn-b:#D6860E; --warn-bg:#3A2A14;
+    --stretch:#D99BFF; --stretch-b:#B575E8; --stretch-bg:#332040;
+    --danger:#FF7070; --danger-b:#DE4B4B; --danger-bg:#3A1E1E;
+    --scrim:rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Nunito Sans', system-ui, sans-serif;
+  }
+  ::selection{ background:var(--primary-soft); }
+  a{ color:var(--primary); }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  h1,h2,h3{ font-family:'Baloo 2', system-ui, sans-serif; margin:0; text-wrap:balance; }
+
+  /* ---------- chunky "tile" mechanic (borrowed from Duolingo's pressable buttons) ---------- */
+  .tile{
+    border:2px solid var(--tone-b, var(--line));
+    border-bottom-width:5px;
+    border-radius:16px;
+    transition:transform .05s ease, border-bottom-width .05s ease, margin-top .05s ease;
+  }
+  .tile:active{ transform:translateY(3px); border-bottom-width:2px; margin-top:3px; }
+  @media (prefers-reduced-motion:reduce){ .tile, .tile:active{ transition:none; transform:none; margin-top:0; } }
+
+  /* ---------- Shell ---------- */
+  .shell{ max-width:1180px; margin:0 auto; padding:28px 24px 80px; }
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:20px; flex-wrap:wrap; margin-bottom:20px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .mark{
+    width:44px; height:44px; border-radius:14px; background:var(--primary);
+    border:2px solid var(--primary-b); border-bottom-width:5px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand h1{ font-size:1.5rem; font-weight:700; color:var(--ink); letter-spacing:-.01em; }
+  .brand p{ margin:.15rem 0 0; color:var(--ink-muted); font-size:.82rem; font-weight:700; max-width:44ch; }
+
+  .profile-chip{
+    display:flex; align-items:center; gap:10px; background:var(--surface);
+    border-radius:16px; padding:9px 16px 9px 9px; font-size:.82rem; white-space:nowrap;
+  }
+  .profile-chip .avatar{
+    width:36px; height:36px; border-radius:11px; background:var(--stretch);
+    border:2px solid var(--stretch-b); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.05rem; flex:none;
+  }
+  .profile-chip .stat{ color:var(--ink-muted); font-weight:700; }
+  .profile-chip .stat b{ color:var(--ink); font-weight:800; }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; margin-bottom:20px;
+  }
+  .tabs{ display:inline-flex; gap:8px; }
+  .tabs button{
+    appearance:none; background:var(--surface); color:var(--ink-muted);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.92rem; letter-spacing:.01em;
+    padding:9px 20px; border-radius:14px; border:2px solid var(--line); border-bottom-width:5px;
+    cursor:pointer;
+  }
+  .tabs button.active{ background:var(--primary); color:var(--primary-ink); border-color:var(--primary-b); }
+  .tabs button:active{ transform:translateY(3px); border-bottom-width:2px; }
+  .tabs button:focus-visible, select:focus-visible, .card:focus-visible, .btn:focus-visible, .x-close:focus-visible, .schol-card:focus-visible{
+    outline:3px solid var(--primary); outline-offset:2px;
+  }
+
+  .filters{ display:flex; gap:10px; flex-wrap:wrap; }
+  .filters select{
+    font-family:'Nunito Sans',sans-serif; font-weight:700; font-size:.82rem; color:var(--ink);
+    background:var(--surface); border:2px solid var(--line); border-bottom-width:4px;
+    border-radius:12px; padding:8px 12px;
+  }
+
+  .note{
+    display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:700;
+    color:var(--ink-muted); background:var(--surface-2); border:2px dashed var(--line);
+    border-radius:999px; padding:6px 14px; margin-bottom:22px;
+  }
+
+  /* ---------- Board (Masters) ---------- */
+  .board{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start; }
+  @media (max-width:880px){ .board{ grid-template-columns:1fr; } }
+
+  .column-head{
+    display:flex; align-items:center; gap:10px; padding:10px 14px;
+    border-radius:14px; margin-bottom:14px; background:var(--tone-bg); color:var(--tone);
+  }
+  .column-head .dot{ width:12px; height:12px; border-radius:4px; background:var(--tone); flex:none; }
+  .column-head h2{ font-size:1.05rem; font-weight:700; flex:1; }
+  .column-head .count{ font-family:'IBM Plex Mono',monospace; font-size:.8rem; font-weight:600; opacity:.85; }
+
+  .cards{ display:flex; flex-direction:column; gap:14px; }
+
+  .card{
+    text-align:left; width:100%; background:var(--surface); border-radius:16px;
+    padding:16px 18px; cursor:pointer; font:inherit; color:inherit;
+    display:flex; flex-direction:column; gap:11px;
+  }
+  .card-top{ display:flex; justify-content:space-between; gap:10px; }
+  .card-uni{ font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-muted); font-weight:800; }
+  .card-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.05rem; margin-top:2px; color:var(--ink); }
+  .badge-country{
+    flex:none; font-size:.7rem; font-weight:800; padding:4px 9px; border-radius:9px;
+    background:var(--primary-soft); color:var(--primary); height:fit-content;
+  }
+  .tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .tag{
+    font-size:.72rem; font-weight:700; background:var(--surface-2); color:var(--ink-muted);
+    padding:4px 10px; border-radius:9px;
+  }
+  .metric-row{ display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-muted); font-weight:700; }
+  .metric-row b{ color:var(--ink); font-weight:800; }
+  .gap-line{
+    font-size:.78rem; font-weight:800; padding:9px 11px; border-radius:11px;
+    background:var(--tone-bg); color:var(--tone); display:flex; gap:7px; align-items:flex-start;
+  }
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; font-size:.8rem; color:var(--ink-muted); font-weight:700; }
+  .deadline-pill{
+    font-family:'IBM Plex Mono',monospace; font-size:.72rem; font-weight:700;
+    padding:5px 11px; border-radius:999px;
+  }
+  .deadline-soon{ background:var(--danger-bg); color:var(--danger); }
+  .deadline-mid{ background:var(--warn-bg); color:var(--warn); }
+  .deadline-far{ background:var(--ok-bg); color:var(--ok); }
+
+  /* ---------- Scholarships list ---------- */
+  .schol-list{ display:flex; flex-direction:column; gap:14px; max-width:760px; margin:0 auto; }
+  .schol-card{
+    display:flex; gap:16px; background:var(--surface); border-radius:18px;
+    padding:18px 20px; cursor:pointer; text-align:left; font:inherit; color:inherit;
+    width:100%; align-items:flex-start;
+  }
+  .schol-icon{
+    flex:none; width:48px; height:48px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; background:var(--tone); border:2px solid var(--tone-b); color:#fff;
+  }
+  .schol-body{ flex:1; display:flex; flex-direction:column; gap:6px; }
+  .schol-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.08rem; color:var(--ink); }
+  .status-line{ display:flex; align-items:center; gap:7px; font-size:.85rem; font-weight:800; color:var(--tone); }
+  .schol-meta{ font-size:.83rem; color:var(--ink-muted); font-weight:700; }
+  .schol-foot{ display:flex; justify-content:flex-end; align-items:center; margin-top:4px; }
+
+  /* ---------- Detail panel ---------- */
+  .scrim{ position:fixed; inset:0; background:var(--scrim); opacity:0; pointer-events:none; transition:opacity .18s ease; z-index:20; }
+  .scrim.open{ opacity:1; pointer-events:auto; }
+
+  .panel{
+    position:fixed; top:0; right:0; height:100%; width:min(440px,92vw);
+    background:var(--surface); box-shadow:-24px 0 48px -24px rgba(0,0,0,.35);
+    transform:translateX(100%); transition:transform .22s ease; z-index:21;
+    display:flex; flex-direction:column; border-left:3px solid var(--line);
+  }
+  .panel.open{ transform:translateX(0); }
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+    padding:22px 22px 16px; border-bottom:2px solid var(--line);
+  }
+  .panel-head .card-uni{ margin-bottom:2px; }
+  .panel-head h3{ font-size:1.3rem; font-weight:700; color:var(--ink); }
+  .x-close{
+    appearance:none; background:var(--surface-2); color:var(--ink-muted);
+    border:2px solid var(--line); border-bottom-width:4px;
+    width:34px; height:34px; border-radius:11px; cursor:pointer; font-size:1rem; flex:none;
+  }
+  .x-close:active{ transform:translateY(2px); border-bottom-width:2px; }
+  .panel-body{ padding:20px 22px 28px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:22px; }
+
+  .status-banner{
+    border-radius:14px; padding:13px 15px; font-size:.86rem; font-weight:800;
+    background:var(--tone-bg); color:var(--tone); display:flex; gap:9px; align-items:flex-start;
+  }
+
+  .criterion{ display:flex; flex-direction:column; gap:6px; }
+  .criterion-top{ display:flex; justify-content:space-between; font-size:.82rem; font-weight:700; }
+  .criterion-top .label{ color:var(--ink-muted); }
+  .criterion-top .value{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
+  .bar-track{ position:relative; height:10px; border-radius:999px; background:var(--surface-2); }
+  .bar-fill{ position:absolute; inset:0 auto 0 0; height:100%; border-radius:999px; }
+  .bar-fill.pass{ background:var(--ok); }
+  .bar-fill.fail{ background:var(--danger); }
+  .bar-mark{ position:absolute; top:-3px; width:3px; height:16px; background:var(--ink); border-radius:2px; }
+
+  .section-label{ font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-muted); font-weight:800; }
+  ul.plain{ margin:0; padding-left:1.15em; font-size:.87rem; color:var(--ink); font-weight:700; display:flex; flex-direction:column; gap:6px; }
+
+  .facts{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .fact{ background:var(--surface-2); border-radius:13px; padding:11px 13px; }
+  .fact .k{ font-size:.72rem; color:var(--ink-muted); font-weight:700; }
+  .fact .v{ font-family:'IBM Plex Mono',monospace; font-weight:700; margin-top:2px; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--primary); color:var(--primary-ink);
+    border:2px solid var(--primary-b); border-bottom-width:5px; border-radius:14px;
+    padding:12px 16px; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.9rem;
+    cursor:pointer; text-decoration:none; letter-spacing:.01em;
+  }
+  .btn:active{ transform:translateY(3px); border-bottom-width:2px; }
+  .btn.ghost{ background:var(--surface); color:var(--primary); border-color:var(--line); }
+
+  /* ---------- Interactive Transcript (profile) ---------- */
+  .identity-card{
+    display:flex; flex-wrap:wrap; gap:10px 28px; background:var(--surface); border-radius:16px;
+    padding:16px 20px; margin-bottom:18px;
+  }
+  .identity-card div{ font-size:.82rem; }
+  .identity-card .k{ display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-muted); font-weight:800; }
+  .identity-card .v{ font-weight:800; color:var(--ink); }
+
+  .summary-banner{
+    display:flex; flex-wrap:wrap; gap:22px 28px; align-items:flex-start; justify-content:space-between;
+    background:var(--primary-soft); border-radius:18px; padding:18px 22px; margin-bottom:20px;
+  }
+  .summary-stat .k{ font-size:.74rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--primary); opacity:.8; }
+  .summary-stat .v{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.6rem; color:var(--ink); }
+  .summary-stat .v small{ font-family:'Nunito Sans',sans-serif; font-size:.85rem; font-weight:800; color:var(--ink-muted); margin-left:6px; }
+  .summary-note{ font-size:.78rem; font-weight:700; color:var(--ink-muted); max-width:34ch; }
+
+  .avg-table{ width:100%; border-collapse:collapse; font-size:.82rem; margin-top:4px; }
+  .avg-table th, .avg-table td{ text-align:left; padding:4px 12px 4px 0; }
+  .avg-table th{ color:var(--ink-muted); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; font-weight:800; }
+  .avg-table td{ font-weight:800; color:var(--ink); font-family:'IBM Plex Mono',monospace; }
+
+  .toggle-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .toggle{ position:relative; width:46px; height:26px; flex:none; }
+  .toggle input{ opacity:0; width:0; height:0; position:absolute; }
+  .toggle .track{ position:absolute; inset:0; background:var(--line); border-radius:999px; cursor:pointer; transition:background .15s; }
+  .toggle .track::before{
+    content:""; position:absolute; width:20px; height:20px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:transform .15s; box-shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+  .toggle input:checked + .track{ background:var(--ok); }
+  .toggle input:checked + .track::before{ transform:translateX(20px); }
+  .toggle-label{ font-weight:800; font-size:.85rem; color:var(--ink); max-width:38ch; }
+  .ielts-field{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .ielts-field label{ font-weight:800; font-size:.85rem; color:var(--ink); }
+  .ielts-field input{
+    width:76px; font:inherit; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1rem;
+    text-align:center; padding:8px 6px; border-radius:11px; border:2px solid var(--line); border-bottom-width:4px;
+    background:var(--surface); color:var(--ink);
+  }
+
+  .part-switch{ display:inline-flex; gap:8px; margin-bottom:16px; }
+  .part-switch button{
+    appearance:none; background:var(--surface); color:var(--ink-muted);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.86rem;
+    padding:8px 18px; border-radius:12px; border:2px solid var(--line); border-bottom-width:4px; cursor:pointer;
+  }
+  .part-switch button.active{ background:var(--stretch); color:#fff; border-color:var(--stretch-b); }
+  .part-switch button:active{ transform:translateY(2px); border-bottom-width:2px; }
+
+  .year-group-label{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.92rem; color:var(--ink-muted); margin:20px 2px 8px; }
+  .year-group-label:first-child{ margin-top:0; }
+
+  .module-list{ display:flex; flex-direction:column; gap:12px; max-width:760px; margin:0 auto; }
+  .module-card{ background:var(--surface); border-radius:16px; padding:14px 18px; display:flex; flex-direction:column; gap:10px; }
+  .module-card-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .module-name{ font-weight:800; font-size:.9rem; color:var(--ink); }
+  .module-credits{ font-size:.74rem; font-weight:700; color:var(--ink-muted); }
+  .indicative-note{
+    font-size:.7rem; font-weight:700; color:var(--warn); background:var(--warn-bg);
+    border-radius:8px; padding:3px 8px; margin-top:4px; display:inline-block;
+  }
+  .mark-chip{
+    flex:none; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:.82rem;
+    padding:6px 11px; border-radius:9px; background:var(--surface-2); color:var(--ink-muted); text-align:right; min-width:64px;
+  }
+  .mark-chip .pct{ display:block; font-size:1rem; }
+  .mark-chip .sub{ display:block; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; opacity:.8; }
+  .mark-chip.first{ background:var(--ok-bg); color:var(--ok); }
+  .mark-chip.upper{ background:var(--primary-soft); color:var(--primary); }
+  .mark-chip.lower{ background:var(--warn-bg); color:var(--warn); }
+  .mark-chip.empty{ background:var(--surface-2); color:var(--ink-muted); }
+
+  .component-row{ display:flex; align-items:center; gap:10px; }
+  .component-row .comp-name{ flex:1; font-size:.8rem; font-weight:700; color:var(--ink-muted); }
+  .component-row .comp-weight{ flex:none; font-size:.72rem; font-weight:700; color:var(--ink-muted); font-family:'IBM Plex Mono',monospace; width:38px; text-align:right; }
+  .component-row input{
+    flex:none; width:72px; font:inherit; font-family:'IBM Plex Mono',monospace; font-weight:700;
+    text-align:center; padding:7px 6px; border-radius:10px; border:2px solid var(--line); border-bottom-width:4px;
+    background:var(--surface-2); color:var(--ink);
+  }
+  .progress-note{ font-size:.76rem; font-weight:700; color:var(--ink-muted); }
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9L12 4l9 5-9 5-9-5Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M7 11.5V17c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <h1>Route du Futur</h1>
+        <p>Licence CS (Lancaster) &rarr; Masters USA / UK</p>
+      </div>
+    </div>
+    <div class="profile-chip">
+      <div class="avatar">L</div>
+      <div>
+        <div style="color:var(--ink); font-weight:800;">Ton profil</div>
+        <div class="stat">Moyenne <b class="mono" id="chip-avg">70/100</b> &middot; Anglais <b class="mono" id="chip-english">Exempté</b></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="note">Rentre chaque note d&egrave;s qu&rsquo;elle tombe (coursework, examen...) &mdash; la moyenne du module et ta moyenne globale se recalculent aussit&ocirc;t, m&ecirc;me si l&rsquo;ann&eacute;e n&rsquo;est pas termin&eacute;e.</div>
+
+  <div class="controls">
+    <div class="tabs" role="tablist">
+      <button id="tab-profile" class="active" role="tab" aria-selected="true">Mon profil</button>
+      <button id="tab-masters" role="tab" aria-selected="false">Masters</button>
+      <button id="tab-schol" role="tab" aria-selected="false">Bourses</button>
+    </div>
+    <div class="filters" id="filters-masters" style="display:none;">
+      <select id="f-country" aria-label="Filtrer par pays">
+        <option value="all">Tous les pays</option>
+        <option value="UK">Royaume-Uni</option>
+        <option value="US">États-Unis</option>
+      </select>
+      <select id="f-tag" aria-label="Filtrer par domaine">
+        <option value="all">Tous les domaines</option>
+      </select>
+    </div>
+  </div>
+
+  <section id="view-profile">
+    <div class="identity-card">
+      <div><span class="k">Étudiant</span><span class="v">Licence Computer Science &middot; Part II</span></div>
+      <div><span class="k">Établissement</span><span class="v">Lancaster University (Ghana)</span></div>
+      <div><span class="k">Année en cours</span><span class="v">2026/27 &middot; Part III</span></div>
+    </div>
+
+    <div class="summary-banner">
+      <div>
+        <div class="summary-stat">
+          <div class="k">Moyenne pondérée à ce jour</div>
+          <div class="v"><span id="summary-avg">&mdash;</span><small id="summary-class"></small></div>
+        </div>
+        <table class="avg-table" id="avg-table"></table>
+      </div>
+      <div>
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" id="english-exempt" checked>
+            <span class="track"></span>
+          </label>
+          <span class="toggle-label">Exempté(e) du test d&rsquo;anglais &mdash; cursus intégralement en anglais (Lancaster Ghana)</span>
+        </div>
+        <div class="ielts-field" id="ielts-field" style="display:none;">
+          <label for="ielts-input">Score IELTS</label>
+          <input type="number" id="ielts-input" min="0" max="9" step="0.5" value="7.5">
+        </div>
+        <div class="summary-note">Si un Master exige quand même un test malgré l&rsquo;exemption, ce sera signalé dans ses critères.</div>
+      </div>
+    </div>
+
+    <div class="part-switch" id="part-switch"></div>
+    <div class="module-list" id="module-list"></div>
+  </section>
+
+  <section id="view-masters" style="display:none;">
+    <div class="board" id="board"></div>
+  </section>
+
+  <section id="view-schol" style="display:none;">
+    <div class="schol-list" id="schol-list"></div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+  <div class="panel-head">
+    <div>
+      <div class="card-uni" id="panel-uni"></div>
+      <h3 id="panel-title"></h3>
+    </div>
+    <button class="x-close" id="panel-close" aria-label="Fermer">&#10005;</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</aside>
+
+<script>
+const STUDENT = { avg: 0, ielts: 7.5, englishExempt: true };
+
+const ICONS = {
+  check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bolt: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 3 5 14h5l-1 7 8-11h-5l1-7Z" fill="currentColor"/></svg>',
+  star: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.1 1.4-6.3-4.8-4.3 6.4-.6L12 3Z" fill="currentColor"/></svg>',
+  trophy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M7 5H4v1a4 4 0 0 0 3 3.87M17 5h3v1a4 4 0 0 1-3 3.87" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 13v3m-3 3h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+  lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2"/></svg>',
+};
+
+// Part I : catalogue illustratif (année pas encore transmise) — structure générique à 2 composantes,
+// vide par défaut : sert à montrer comment une année "en cours" se remplit note par note.
+const PART1_MODULES = [
+  { code:'SCC.100', name:'Digital Systems', credits:15, components:[{name:'Coursework',weight:40,mark:null},{name:'Exam',weight:60,mark:null}] },
+  { code:'SCC.110', name:'Software Development', credits:15, components:[{name:'Coursework',weight:50,mark:null},{name:'Exam',weight:50,mark:null}] },
+  { code:'SCC.121', name:'Introduction to Programming', credits:15, components:[{name:'Coursework',weight:40,mark:null},{name:'Exam',weight:60,mark:null}] },
+  { code:'SCC.130', name:'Web Technologies', credits:15, components:[{name:'Coursework',weight:60,mark:null},{name:'Exam',weight:40,mark:null}] },
+  { code:'SCC.160', name:'Data Structures & Algorithms', credits:15, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+  { code:'SCC.170', name:'Mathematics for Computer Scientists', credits:15, components:[{name:'Coursework',weight:20,mark:null},{name:'Exam',weight:80,mark:null}] },
+];
+
+// Part II : repris de ton relevé interactif Lancaster (Ghana). Année 2 : composantes déjà reçues
+// (pondération Coursework/Exam déduite de tes marks réels). Année 3 : le département n'a pas encore
+// publié la structure officielle — on utilise une pondération indicative (30/70, le schéma le plus
+// fréquent dans tes années précédentes) pour que tu puisses commencer à te projeter dès maintenant ;
+// à corriger dès que Lancaster publie la vraie structure.
+const PART2_YEARS = {
+  2: { label:'2025/26', modules:[
+    { code:'GHSCC.200', name:'Group Project', credits:20, components:[{name:'Coursework (rapport & présentation)',weight:50,mark:75},{name:'Coursework (démo & réflexion)',weight:50,mark:68}] },
+    { code:'GHSCC.211', name:'Software Design', credits:15, components:[{name:'Coursework',weight:60,mark:67},{name:'Exam',weight:40,mark:65}] },
+    { code:'GHSCC.212', name:'Advanced Programming', credits:10, components:[{name:'Coursework',weight:30,mark:75},{name:'Exam',weight:70,mark:58.3}] },
+    { code:'GHSCC.221', name:'Data Engineering', credits:15, components:[{name:'Coursework',weight:40,mark:70.6},{name:'Exam',weight:60,mark:82.7}] },
+    { code:'GHSCC.222', name:'Artificial Intelligence Concepts', credits:10, components:[{name:'Coursework',weight:30,mark:79.5},{name:'Exam',weight:70,mark:68}] },
+    { code:'GHSCC.231', name:'Computer Networks and Systems', credits:15, components:[{name:'Coursework',weight:30,mark:72},{name:'Exam',weight:70,mark:57}] },
+    { code:'GHSCC.233', name:'Operating Systems', credits:10, components:[{name:'Coursework',weight:30,mark:74.5},{name:'Exam',weight:70,mark:78}] },
+    { code:'GHSCC.241', name:'Human-Computer Interaction', credits:15, components:[{name:'Coursework',weight:30,mark:78},{name:'Exam',weight:70,mark:65}] },
+    { code:'GHSCC.252', name:'Secure Cyber Systems', credits:10, components:[{name:'Coursework',weight:30,mark:60.3},{name:'Exam',weight:70,mark:80}] },
+  ]},
+  3: { label:'2026/27', modules:[
+    { code:'GHSCC.300', name:'Individual Project', credits:30, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.321', name:'Languages and Compilation', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.322', name:'Computer Vision', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.323', name:'Deep Learning', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.331', name:'Distributed Systems', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.333', name:'Advanced Networking', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+    { code:'GHSCC.351', name:'Advanced Cyber Security', credits:15, indicative:true, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
+  ]},
+};
+
+function classification(avg){
+  if (avg >= 70) return 'First';
+  if (avg >= 60) return '2:1';
+  if (avg >= 50) return '2:2';
+  if (avg >= 40) return 'Third';
+  return null;
+}
+function classPillClass(avg){
+  if (avg >= 70) return 'first';
+  if (avg >= 60) return 'upper';
+  if (avg >= 50) return 'lower';
+  return '';
+}
+
+// Note du module = moyenne pondérée des SEULES composantes déjà rentrées, ramenée sur 100%.
+// receivedPct indique quelle part du poids total du module a déjà été saisie (100 = complet).
+function moduleMark(mod){
+  const entered = mod.components.filter(c => c.mark !== null && !Number.isNaN(c.mark));
+  if (!entered.length) return null;
+  const enteredWeight = entered.reduce((s,c) => s + c.weight, 0);
+  const weighted = entered.reduce((s,c) => s + c.mark * c.weight, 0);
+  return { mark: Math.round((weighted / enteredWeight) * 10) / 10, receivedPct: Math.round(enteredWeight) };
+}
+
+function yearAverage(mods){
+  let weighted = 0, credits = 0, receivedWeighted = 0, totalWeight = 0;
+  mods.forEach(mod => {
+    const m = moduleMark(mod);
+    totalWeight += mod.credits;
+    if (!m) return;
+    weighted += m.mark * mod.credits;
+    credits += mod.credits;
+    receivedWeighted += mod.credits * (m.receivedPct / 100);
+  });
+  return {
+    avg: credits ? Math.round((weighted / credits) * 10) / 10 : null,
+    progress: totalWeight ? Math.round((receivedWeighted / totalWeight) * 100) : 0,
+  };
+}
+
+function recomputeStudent(){
+  // La classification finale (comme sur le vrai relevé Lancaster) se base sur les années
+  // Part II (2 et 3) — la 1ère année ne compte pas dans la moyenne officielle.
+  const part2Mods = Object.values(PART2_YEARS).flatMap(y => y.modules);
+  const overall = yearAverage(part2Mods);
+  STUDENT.avg = overall.avg ?? 0;
+
+  document.getElementById('chip-avg').textContent = `${STUDENT.avg}/100`;
+  document.getElementById('chip-english').textContent = STUDENT.englishExempt ? 'Exempté' : `IELTS ${STUDENT.ielts.toFixed(1)}`;
+  document.getElementById('summary-avg').textContent = overall.avg !== null ? `${STUDENT.avg}/100` : '—';
+  const cls = classification(STUDENT.avg);
+  document.getElementById('summary-class').textContent = overall.avg !== null && cls
+    ? `${cls} · ${overall.progress}% de l’année saisie` : '';
+
+  const table = document.getElementById('avg-table');
+  const rows = Object.entries(PART2_YEARS).map(([y, data]) => {
+    const a = yearAverage(data.modules);
+    return `<tr><td>Année ${y} (${data.label})</td><td class="mono">${a.avg !== null ? a.avg + '% (' + a.progress + '% saisi)' : '—'}</td></tr>`;
+  }).join('');
+  table.innerHTML = `<tr><th>Année</th><th>Moyenne provisoire</th></tr>${rows}<tr><td>Global (Part II)</td><td class="mono">${overall.avg !== null ? overall.avg + '%' : '—'}</td></tr>`;
+
+  renderBoard();
+}
+
+let activePart = 'II';
+
+function renderProfile(){
+  const switchWrap = document.getElementById('part-switch');
+  switchWrap.innerHTML = '';
+  ['I','II'].forEach(p => {
+    const b = document.createElement('button');
+    b.textContent = `Part ${p} Transcript`;
+    b.className = p === activePart ? 'active' : '';
+    b.addEventListener('click', () => { activePart = p; renderProfile(); });
+    switchWrap.appendChild(b);
+  });
+
+  const list = document.getElementById('module-list');
+  list.innerHTML = '';
+
+  if (activePart === 'I') {
+    PART1_MODULES.forEach(mod => list.appendChild(renderModuleCard(mod)));
+  } else {
+    Object.entries(PART2_YEARS).forEach(([y, data]) => {
+      const label = document.createElement('div');
+      label.className = 'year-group-label';
+      label.textContent = `Année ${y} — ${data.label}`;
+      list.appendChild(label);
+      data.modules.forEach(mod => list.appendChild(renderModuleCard(mod)));
+    });
+  }
+}
+
+function renderModuleCard(mod){
+  const card = document.createElement('div');
+  card.className = 'module-card';
+
+  const chipHTML = () => {
+    const m = moduleMark(mod);
+    if (!m) return `<span class="mark-chip empty"><span class="pct">—</span><span class="sub">en attente</span></span>`;
+    const complete = m.receivedPct >= 100;
+    const cls = complete ? classPillClass(m.mark) : '';
+    return `<span class="mark-chip ${cls}"><span class="pct">${m.mark}%</span><span class="sub">${complete ? (classification(m.mark) ?? '') : m.receivedPct + '% reçu'}</span></span>`;
+  };
+
+  card.innerHTML = `
+    <div class="module-card-head">
+      <div>
+        <div class="module-name">${mod.name}</div>
+        <div class="module-credits">${mod.code} &middot; ${mod.credits} crédits</div>
+        ${mod.indicative ? `<span class="indicative-note">Structure indicative &mdash; pas encore confirmée par le département</span>` : ''}
+      </div>
+      <span class="chip-slot">${chipHTML()}</span>
+    </div>
+    <div class="components"></div>`;
+
+  const compsWrap = card.querySelector('.components');
+  mod.components.forEach(comp => {
+    const row = document.createElement('div');
+    row.className = 'component-row';
+    row.innerHTML = `
+      <span class="comp-name">${comp.name}</span>
+      <span class="comp-weight mono">${comp.weight}%</span>
+      <input type="number" min="0" max="100" placeholder="—" value="${comp.mark ?? ''}">`;
+    row.querySelector('input').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      comp.mark = Number.isNaN(v) ? null : Math.max(0, Math.min(100, v));
+      card.querySelector('.chip-slot').innerHTML = chipHTML();
+      recomputeStudent();
+    });
+    compsWrap.appendChild(row);
+  });
+
+  return card;
+}
+
+document.getElementById('english-exempt').addEventListener('change', (e) => {
+  STUDENT.englishExempt = e.target.checked;
+  document.getElementById('ielts-field').style.display = STUDENT.englishExempt ? 'none' : 'flex';
+  document.getElementById('chip-english').textContent = STUDENT.englishExempt ? 'Exempté' : `IELTS ${STUDENT.ielts.toFixed(1)}`;
+  renderBoard();
+});
+document.getElementById('ielts-input').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  STUDENT.ielts = Number.isNaN(v) ? 0 : Math.max(0, Math.min(9, v));
+  document.getElementById('chip-english').textContent = STUDENT.englishExempt ? 'Exempté' : `IELTS ${STUDENT.ielts.toFixed(1)}`;
+  renderBoard();
+});
+
+const MASTERS = [
+  { id:'ed-ai', uni:'University of Edinburgh', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
+    reqAvg:62, reqLabel:'2:1 (62/100)', reqIelts:6.5, cost:'£32 400 / an', deadline:'2026-06-30',
+    other:['Lettre de motivation','1 lettre de référence académique'] },
+  { id:'man-ds', uni:'University of Manchester', program:'MSc Data Science', country:'UK', tags:['Data Science'],
+    reqAvg:60, reqLabel:'2:1 (60/100)', reqIelts:6.5, cost:'£29 500 / an', deadline:'2026-07-15',
+    other:['Lettre de motivation','Portfolio de projets (optionnel)'] },
+  { id:'gt-cs', uni:'Georgia Institute of Technology', program:'MS Computer Science', country:'US', tags:['Software Engineering'],
+    reqAvg:64, reqLabel:'≈ 3.4 GPA', reqIelts:7.0, cost:'$32 000 / an', deadline:'2026-03-01',
+    other:['3 lettres de recommandation','Relevé de notes officiel'] },
+
+  { id:'icl-ai', uni:'Imperial College London', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
+    reqAvg:70, reqLabel:'First (70/100)', reqIelts:7.0, cost:'£38 500 / an', deadline:'2026-01-15',
+    other:['Lettre de motivation','2 lettres de référence'] },
+  { id:'ucl-dsml', uni:'University College London', program:'MSc Data Science & Machine Learning', country:'UK', tags:['Data Science','IA'],
+    reqAvg:66, reqLabel:'2:1 haut (66/100)', reqIelts:8.0, cost:'£34 900 / an', deadline:'2026-01-31',
+    other:['Lettre de motivation','Entretien technique'] },
+  { id:'cmu-infosec', uni:'Carnegie Mellon University', program:'MS Information Security', country:'US', tags:['Cybersécurité'],
+    reqAvg:72, reqLabel:'≈ 3.7 GPA', reqIelts:7.5, cost:'$46 000 / an', deadline:'2026-02-10',
+    other:['3 lettres de recommandation','Essai personnel'] },
+
+  { id:'ox-cs', uni:'University of Oxford', program:'MSc Computer Science', country:'UK', tags:['IA','Software Engineering'],
+    reqAvg:76, reqLabel:'First solide (76/100)', reqIelts:7.5, cost:'£41 000 / an', deadline:'2026-01-06',
+    other:['2 lettres de référence académiques','Entretien'] },
+  { id:'stan-cs', uni:'Stanford University', program:'MS Computer Science (piste IA)', country:'US', tags:['IA'],
+    reqAvg:78, reqLabel:'≈ 3.9 GPA', reqIelts:8.0, cost:'$58 000 / an', deadline:'2025-12-01',
+    other:['3 lettres de recommandation','GRE recommandé'] },
+  { id:'mit-meng', uni:'Massachusetts Institute of Technology', program:'MEng in Computer Science', country:'US', tags:['Software Engineering','IA'],
+    reqAvg:80, reqLabel:'≈ 3.95 GPA', reqIelts:8.0, cost:'$59 000 / an', deadline:'2025-12-15',
+    other:['Doit être admis au préalable en 4e année MIT (voie spécifique)'] },
+];
+
+const SCHOLARSHIPS = [
+  { id:'fulbright', name:'Fulbright Foreign Student Program', coverage:'Financement complet (frais + logement)',
+    applies:'Tous les Masters aux États-Unis', deadline:'2026-10-15',
+    eligible:true, missing:null },
+  { id:'chevening', name:'Chevening Scholarship', coverage:'Financement complet',
+    applies:'Tous les Masters au Royaume-Uni', deadline:'2026-11-05',
+    eligible:false, missing:'2 ans d’expérience professionnelle après la licence (tu en as 0 actuellement)' },
+  { id:'lancaster-award', name:'Lancaster Global Achievers Award', coverage:'Bourse partielle &mdash; £5 000',
+    applies:'Anciens étudiants Lancaster poursuivant vers un Master partenaire', deadline:'2026-04-30',
+    eligible:true, missing:null },
+  { id:'great', name:'GREAT Scholarships', coverage:'Bourse partielle &mdash; £10 000',
+    applies:'Masters éligibles au Royaume-Uni (liste restreinte par le British Council)', deadline:'2026-02-20',
+    eligible:true, missing:null },
+];
+
+function englishOk(m){ return STUDENT.englishExempt ? true : STUDENT.ielts >= m.reqIelts; }
+
+function classify(m){
+  const avgOk = STUDENT.avg >= m.reqAvg;
+  const ieltsOk = englishOk(m);
+  if (avgOk && ieltsOk) return 'accessible';
+  const avgGap = m.reqAvg - STUDENT.avg;
+  const ieltsGap = STUDENT.englishExempt ? 0 : (m.reqIelts - STUDENT.ielts);
+  const worst = Math.max(avgGap/10, ieltsGap);
+  return worst > 0.9 ? 'ambitieux' : 'consolider';
+}
+
+function gapText(m){
+  const avgGap = m.reqAvg - STUDENT.avg;
+  const parts = [];
+  if (avgGap > 0) parts.push(`moyenne insuffisante de ${+avgGap.toFixed(1)} point${avgGap>1?'s':''} (${STUDENT.avg} vs ${m.reqAvg} requis)`);
+  if (!STUDENT.englishExempt) {
+    const ieltsGap = +(m.reqIelts - STUDENT.ielts).toFixed(1);
+    if (ieltsGap > 0) parts.push(`IELTS insuffisant de ${ieltsGap} point${ieltsGap>1?'s':''} (${STUDENT.ielts} vs ${m.reqIelts} requis)`);
+  }
+  return parts.length ? 'Écart : ' + parts.join(' · ') : null;
+}
+
+function daysUntil(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date('2026-08-31T00:00:00');
+  return Math.round((d - now) / 86400000);
+}
+function deadlineClass(days){
+  if (days <= 60) return 'deadline-soon';
+  if (days <= 150) return 'deadline-mid';
+  return 'deadline-far';
+}
+function fmtDate(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+}
+
+const TONE = {
+  accessible: { color:'var(--ok)', border:'var(--ok-b)', bg:'var(--ok-bg)', label:'Accessible', icon:ICONS.check },
+  consolider: { color:'var(--warn)', border:'var(--warn-b)', bg:'var(--warn-bg)', label:'À consolider', icon:ICONS.bolt },
+  ambitieux:  { color:'var(--stretch)', border:'var(--stretch-b)', bg:'var(--stretch-bg)', label:'Ambitieux', icon:ICONS.star },
+};
+
+const allTags = [...new Set(MASTERS.flatMap(m => m.tags))].sort();
+const tagSelect = document.getElementById('f-tag');
+allTags.forEach(t => {
+  const o = document.createElement('option'); o.value = t; o.textContent = t;
+  tagSelect.appendChild(o);
+});
+
+let state = { country:'all', tag:'all' };
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const buckets = { accessible:[], consolider:[], ambitieux:[] };
+  MASTERS.filter(m => (state.country==='all'||m.country===state.country) && (state.tag==='all'||m.tags.includes(state.tag)))
+    .forEach(m => buckets[classify(m)].push(m));
+
+  ['accessible','consolider','ambitieux'].forEach(key => {
+    const tone = TONE[key];
+    const col = document.createElement('div');
+    col.innerHTML = `
+      <div class="column-head" style="--tone:${tone.color}; --tone-bg:${tone.bg};">
+        <span class="dot"></span>
+        <h2>${tone.label}</h2>
+        <span class="count mono">${buckets[key].length}</span>
+      </div>
+      <div class="cards"></div>`;
+    const cardsWrap = col.querySelector('.cards');
+    buckets[key].forEach(m => cardsWrap.appendChild(renderCard(m, key)));
+    board.appendChild(col);
+  });
+}
+
+function renderCard(m, key){
+  const tone = TONE[key];
+  const gap = gapText(m);
+  const days = daysUntil(m.deadline);
+  const btn = document.createElement('button');
+  btn.className = 'card tile';
+  btn.style.setProperty('--tone-b', tone.border);
+  btn.innerHTML = `
+    <div class="card-top">
+      <div>
+        <div class="card-uni">${m.uni}</div>
+        <div class="card-title">${m.program}</div>
+      </div>
+      <span class="badge-country">${m.country}</span>
+    </div>
+    <div class="tags">${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="metric-row"><span>Moyenne requise</span><b class="mono">${m.reqAvg}/100</b></div>
+    <div class="metric-row"><span>Anglais requis</span><b class="mono">${STUDENT.englishExempt ? 'Exempté ✓' : 'IELTS ' + m.reqIelts.toFixed(1)}</b></div>
+    ${gap ? `<div class="gap-line" style="--tone:${tone.color}; --tone-bg:${tone.bg};">${tone.icon}<span>${gap}</span></div>` : ''}
+    <div class="card-foot">
+      <span>${m.cost}</span>
+      <span class="deadline-pill ${deadlineClass(days)}">${fmtDate(m.deadline)}</span>
+    </div>`;
+  btn.addEventListener('click', () => openMasterPanel(m, key));
+  return btn;
+}
+
+function bar(value, max, req){
+  const pct = Math.min(100, (value/max)*100);
+  const reqPct = Math.min(100, (req/max)*100);
+  const pass = value >= req;
+  return `<div class="bar-track">
+    <div class="bar-fill ${pass?'pass':'fail'}" style="width:${pct}%"></div>
+    <div class="bar-mark" style="left:${reqPct}%"></div>
+  </div>`;
+}
+
+function openMasterPanel(m, key){
+  const tone = TONE[key];
+  document.getElementById('panel-uni').textContent = m.uni;
+  document.getElementById('panel-title').textContent = m.program;
+  const gap = gapText(m);
+  const days = daysUntil(m.deadline);
+
+  const englishBlock = STUDENT.englishExempt
+    ? `<div class="status-banner" style="--tone:var(--ok); --tone-bg:var(--ok-bg); margin-top:14px;">${ICONS.check}<span>Exempté(e) du test d&rsquo;anglais (cursus en anglais)</span></div>`
+    : `<div class="criterion" style="margin-top:14px;">
+        <div class="criterion-top"><span class="label">Anglais &mdash; IELTS</span>
+          <span class="value">${STUDENT.ielts.toFixed(1)} / ${m.reqIelts.toFixed(1)}</span></div>
+        ${bar(STUDENT.ielts, 9, m.reqIelts)}
+      </div>`;
+
+  document.getElementById('panel-body').innerHTML = `
+    <div class="status-banner" style="--tone:${tone.color}; --tone-bg:${tone.bg};">
+      ${tone.icon}<span>${gap ? gap : 'Tu remplis actuellement tous les critères connus pour ce Master.'}</span>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:10px;">Critères d&rsquo;admission</div>
+      <div class="criterion">
+        <div class="criterion-top"><span class="label">Moyenne académique &mdash; requis : ${m.reqLabel}</span>
+          <span class="value">${STUDENT.avg} / ${m.reqAvg}</span></div>
+        ${bar(STUDENT.avg, 100, m.reqAvg)}
+      </div>
+      ${englishBlock}
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Autres pièces demandées</div>
+      <ul class="plain">${m.other.map(o=>`<li>${o}</li>`).join('')}</ul>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><div class="k">Coût annuel</div><div class="v">${m.cost}</div></div>
+      <div class="fact"><div class="k">Date limite</div><div class="v">${fmtDate(m.deadline)} <span style="color:${days<=60?'var(--danger)':'var(--ink-muted)'}">(${days} j)</span></div></div>
+    </div>
+
+    <a class="btn ghost tile" href="https://www.google.com/search?q=${encodeURIComponent(m.uni + ' ' + m.program + ' admission requirements')}" target="_blank" rel="noopener">Chercher la page officielle ↗</a>
+  `;
+  openPanel();
+}
+
+function renderSchol(){
+  const wrap = document.getElementById('schol-list');
+  wrap.innerHTML = '';
+  SCHOLARSHIPS.forEach(s => {
+    const tone = s.eligible ? TONE.accessible : TONE.consolider;
+    const days = daysUntil(s.deadline);
+    const card = document.createElement('button');
+    card.className = 'schol-card tile';
+    card.style.setProperty('--tone-b', tone.border);
+    card.innerHTML = `
+      <div class="schol-icon" style="--tone:${tone.color}; --tone-b:${tone.border};">${ICONS.trophy}</div>
+      <div class="schol-body">
+        <div class="schol-title">${s.name}</div>
+        <div class="status-line" style="--tone:${tone.color};">${s.eligible ? ICONS.check + ' Éligible' : ICONS.bolt + ' ' + s.missing}</div>
+        <div class="schol-meta">Couverture : ${s.coverage}</div>
+        <div class="schol-meta">S&rsquo;applique à : ${s.applies}</div>
+        <div class="schol-foot"><span class="deadline-pill ${deadlineClass(days)}">${fmtDate(s.deadline)}</span></div>
+      </div>`;
+    card.addEventListener('click', () => openScholPanel(s, tone, days));
+    wrap.appendChild(card);
+  });
+}
+
+function openScholPanel(s, tone, days){
+  document.getElementById('panel-uni').textContent = 'Bourse';
+  document.getElementById('panel-title').textContent = s.name;
+  document.getElementById('panel-body').innerHTML = `
+    <div class="status-banner" style="--tone:${tone.color}; --tone-bg:${tone.bg};">
+      ${tone.icon}<span>${s.eligible ? 'Tu remplis actuellement tous les critères connus pour cette bourse.' : 'Il te manque : ' + s.missing}</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="k">Couverture</div><div class="v" style="font-family:'Nunito Sans';font-weight:800;">${s.coverage}</div></div>
+      <div class="fact"><div class="k">Date limite</div><div class="v">${fmtDate(s.deadline)} <span style="color:${days<=60?'var(--danger)':'var(--ink-muted)'}">(${days} j)</span></div></div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Programmes concernés</div>
+      <p style="font-size:.88rem; font-weight:700; margin:0;">${s.applies}</p>
+    </div>
+  `;
+  openPanel();
+}
+
+function openPanel(){
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById('panel-close').focus();
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('scrim').classList.remove('open');
+}
+document.getElementById('panel-close').addEventListener('click', closePanel);
+document.getElementById('scrim').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+document.getElementById('f-country').addEventListener('change', e => { state.country = e.target.value; renderBoard(); });
+document.getElementById('f-tag').addEventListener('change', e => { state.tag = e.target.value; renderBoard(); });
+
+const tabP = document.getElementById('tab-profile');
+const tabM = document.getElementById('tab-masters');
+const tabS = document.getElementById('tab-schol');
+const allTabs = [tabP, tabM, tabS];
+const views = {
+  [tabP.id]: 'view-profile',
+  [tabM.id]: 'view-masters',
+  [tabS.id]: 'view-schol',
+};
+function selectTab(active){
+  allTabs.forEach(t => {
+    const isActive = t === active;
+    t.classList.toggle('active', isActive);
+    t.setAttribute('aria-selected', String(isActive));
+    document.getElementById(views[t.id]).style.display = isActive ? '' : 'none';
+  });
+  document.getElementById('filters-masters').style.display = active === tabM ? '' : 'none';
+}
+tabP.addEventListener('click', () => selectTab(tabP));
+tabM.addEventListener('click', () => selectTab(tabM));
+tabS.addEventListener('click', () => selectTab(tabS));
+
+renderProfile();
+recomputeStudent();
+renderSchol();
+</script>
