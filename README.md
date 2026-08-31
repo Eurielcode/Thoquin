@@ -39,30 +39,34 @@ Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](proto
 2. **Masters** — 3 colonnes Accessible / À consolider / Ambitieux, écart précis affiché par critère (pas un vague "non éligible"), panneau de détail au clic avec comparaison visuelle par critère.
 3. **Bourses** — même logique d'écart précis, critère manquant nommé explicitement.
 
+Une première liste de [20 universités cibles](docs/universites-cibles.md) (10 UK + 10 US, Computer Science, classement QS 2026) a été établie — **statut brouillon**, les rangs 8-10 de chaque liste restent à confirmer sur la source officielle.
+
 ### Pas encore fait
-- **Données réelles non vérifiées** : les critères des Masters et les bourses affichés sont illustratifs, pas vérifiés sur les sites officiels des universités.
+- **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com (bloqué depuis cet environnement, à faire manuellement ou depuis un autre outil).
+- **Collecte des critères d'admission réels** : pour chacune des 20 universités, repérer les URLs des pages Masters CS et de leurs critères d'admission (aucune URL collectée à ce stade).
 - **1ère année (Part I)** : catalogue de modules encore placeholder, en attente des vraies données Lancaster.
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
 - **Pondération Coursework/Exam** : déduite approximativement des vraies notes de l'étudiant pilote, pas la formule officielle exacte de Lancaster.
 - **Adoption étudiante** : réflexion produit évoquée mais pas creusée (comment convaincre d'autres étudiants Lancaster d'utiliser l'outil).
-- **Collecte des vraies données** : les ~250 programmes de Master sur les 20 meilleures universités US/UK en Computer Science ne sont pas encore identifiés ni extraits.
 
 ## 4. Prochaines étapes proposées
 
-1. Identifier les 10 meilleures universités UK + 10 meilleures universités US en Computer Science, et lister leurs URLs de pages d'admission Master (une fois, à stocker en dur).
-2. Choisir la méthode d'extraction définitive (Gemini free tier vs Claude vs open source) selon le budget et le volume réel.
-3. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote pour compléter le relevé interactif.
-4. Concevoir le vrai modèle de données (étudiant, université, Master, critère d'admission, bourse) et l'architecture backend.
-5. Recruter un ou plusieurs étudiants Lancaster CS testeurs pour valider le concept avec de vraies données.
+1. ~~Identifier les 10 meilleures universités UK + 10 meilleures universités US en Computer Science~~ — fait, voir [`docs/universites-cibles.md`](docs/universites-cibles.md) (à valider sur les rangs 8-10).
+2. Repérer les URLs des pages d'admission Master de chacune des 20 universités (une fois, à stocker en dur).
+3. Choisir la méthode d'extraction définitive (Gemini free tier vs Claude vs open source) selon le budget et le volume réel.
+4. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote pour compléter le relevé interactif.
+5. Concevoir le vrai modèle de données (étudiant, université, Master, critère d'admission, bourse) et l'architecture backend.
+6. Recruter un ou plusieurs étudiants Lancaster CS testeurs pour valider le concept avec de vraies données.
 
 ## 5. Structure du dépôt
 
 ```
-├── README.md                      # ce fichier — état d'avancement à jour
+├── README.md                       # ce fichier — état d'avancement à jour
 ├── docs/
-│   └── cahier-des-charges.md      # spécification initiale du projet
+│   ├── cahier-des-charges.md       # spécification initiale du projet
+│   └── universites-cibles.md       # les 20 universités cibles (UK/US, Computer Science)
 └── prototype/
-    └── route-du-futur.html        # prototype interactif (ouvrir dans un navigateur)
+    └── route-du-futur.html         # prototype interactif (ouvrir dans un navigateur)
 ```
 
 ## 6. Note pour toute IA qui reprend ce projet
