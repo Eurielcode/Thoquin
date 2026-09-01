@@ -26,56 +26,53 @@ Le cahier des charges complet est dans [`docs/cahier-des-charges.md`](docs/cahie
 
 ## 3. État d'avancement (dernière mise à jour : voir historique Git)
 
-### ⚠️ Blocage connu — important à lire avant de relancer une extraction automatique
-
-**Cet environnement d'exécution bloque l'accès direct (WebFetch) à tous les domaines `.ac.uk` et `.edu` testés**, sans exception (Oxford, Imperial, Edinburgh, UCL côté UK ; MIT, Stanford, CMU, Berkeley côté US — 8 domaines différents, échec systématique `EGRESS_BLOCKED`). Ce n'est pas un problème de site indisponible, c'est une restriction réseau de l'environnement lui-même. **Ne pas réessayer WebFetch sur ces domaines depuis un environnement avec la même config réseau — ça échouera pareil.**
-
-Options pour débloquer l'extraction des critères d'admission :
-1. **Fournir le contenu texte des pages directement** (copier-coller depuis un navigateur, ou capture d'écran) — l'IA peut alors extraire les critères depuis ce texte/image sans passer par WebFetch.
-2. **Relancer depuis un environnement/outil sans ce blocage réseau** (poste local, autre session Claude Code avec une config réseau différente).
-3. Utiliser une source tierce déjà agrégée (moins fiable, à valider manuellement).
-
-Vu le volume (~90 pages), la meilleure approche pratique est probablement de **prioriser un petit sous-ensemble** (5-10 Masters les plus pertinents pour le profil de l'étudiant pilote) pour copier-coller/screenshot manuellement, plutôt que d'essayer de traiter les 90 d'un coup.
+### Comment on a débloqué l'extraction (contournement du blocage réseau)
+Cet environnement d'exécution bloque WebFetch sur tous les domaines `.ac.uk`/`.edu` (confirmé, ne pas re-tester). La solution qui a marché : l'utilisateur a utilisé **Claude for Chrome** (extension navigateur, session séparée tournant sur son propre réseau) pour visiter les ~96 pages une par une et en extraire les critères, puis a collé le résultat ici pour intégration au dépôt. Cette méthode fonctionne bien mais demande un aller-retour manuel utilisateur ↔ session Chrome ↔ ce dépôt.
 
 ### Décidé
 - **Architecture de matching** : le matching Master/bourse est du code déterministe (comparaison de seuils), **pas** un appel LLM — gratuit, fiable, pas d'hallucination possible.
-- **Extraction des critères d'admission** : LLM utilisé uniquement pour transformer le texte brut des pages d'admission en JSON structuré, une fois par programme (pas par étudiant) — coût négligeable (~1-5$ pour ~250 programmes sur 20 universités). *Bloqué en pratique par le point réseau ci-dessus, pas par le coût.*
-- **Choix LLM pour l'extraction** : pas figé. Options envisagées : Gemini (free tier généreux, bon pour démarrer à 0€), Claude (payant mais fiable sur documents ambigus/tableaux), open source auto-hébergé (0€, plus de travail d'infra).
-- **URLs des pages d'admission** : à collecter une fois et stocker en dur (elles changent rarement) — pas de crawler intelligent nécessaire. Première passe faite, voir ci-dessous.
-- **Saisie des notes** : pas de texte libre. L'étudiant sélectionne ses modules dans un catalogue préchargé et rentre ses notes **composante par composante** (coursework, exam...) au fur et à mesure qu'elles tombent dans l'année — pas seulement la note finale, pour permettre de se projeter un an à l'avance (les candidatures Master se préparent bien avant les résultats finaux).
-- **Anglais** : pour Lancaster Ghana (cursus en anglais), un interrupteur "exempté du test d'anglais" remplace le score IELTS par défaut ; le champ IELTS reste disponible si l'étudiant n'est pas exempté.
-- **Direction visuelle** : esthétique "chunky" façon Duolingo (boutons avec effet 3D pressable, couleurs franches et saturées, typographie ronde Baloo 2 + Nunito Sans) — choisie après recherche sur le phénomène "AI slop design" pour éviter le look générique par défaut (Inter, violet Tailwind, cartes pastel arrondies).
+- **Extraction des critères d'admission** : LLM utilisé pour transformer le texte brut des pages d'admission en JSON structuré. **Fait pour 96/96 programmes** (voir ci-dessous), via Claude for Chrome plutôt que WebFetch direct (bloqué dans cet environnement).
+- **Choix LLM pour l'extraction future** (mises à jour annuelles, nouvelles universités) : pas figé. Options envisagées : Gemini (free tier généreux), Claude (fiable sur documents ambigus), open source auto-hébergé.
+- **URLs des pages d'admission** : collectées une fois, stockées en dur — voir [`masters-urls.md`](docs/masters-urls.md).
+- **Saisie des notes** : pas de texte libre. L'étudiant sélectionne ses modules dans un catalogue préchargé et rentre ses notes **composante par composante** (coursework, exam...) au fur et à mesure qu'elles tombent dans l'année.
+- **Anglais** : pour Lancaster Ghana (cursus en anglais), un interrupteur "exempté du test d'anglais" remplace le score IELTS par défaut.
+- **Direction visuelle** : esthétique "chunky" façon Duolingo (boutons 3D pressable, couleurs franches, typographie ronde Baloo 2 + Nunito Sans).
 
-### Construit (prototype front-end, pas encore connecté à un vrai backend)
-Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](prototype/route-du-futur.html), avec 3 écrans :
-1. **Mon profil / Interactive Transcript** — reproduit la structure du vrai relevé Lancaster (onglets Part I / Part II), saisie des notes par composante avec recalcul en direct de la moyenne pondérée provisoire et un indicateur "% de l'année saisie".
-2. **Masters** — 3 colonnes Accessible / À consolider / Ambitieux, écart précis affiché par critère (pas un vague "non éligible"), panneau de détail au clic avec comparaison visuelle par critère.
-3. **Bourses** — même logique d'écart précis, critère manquant nommé explicitement.
+### Construit
+Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](prototype/route-du-futur.html), avec 3 écrans (Mon profil/Interactive Transcript, Masters, Bourses) — **fonctionne encore sur des données d'exemple, pas les vraies données ci-dessous** (l'intégration reste à faire, voir "Pas encore fait").
 
 Données de référence collectées :
-- [`docs/universites-cibles.md`](docs/universites-cibles.md) — les 20 universités cibles (10 UK + 10 US, classement QS 2026 CS). **Statut brouillon**, rangs 8-10 de chaque liste à confirmer sur la source officielle.
-- [`docs/masters-urls.md`](docs/masters-urls.md) — ~90 programmes de Master (IA, Data Science, Software Engineering, Cybersécurité, Robotique) avec leurs URLs, pour les 20 universités. **Extraction des critères bloquée pour l'instant (voir avertissement ci-dessus)**. Trois constats structurels importants à retenir :
-  - **MIT, Princeton et Caltech n'ont pas de master terminal classique ouvert aux candidats externes** (le "MS"/"SM" y est une étape du doctorat) — à traiter comme cas particuliers dans le modèle de données.
-  - **Stanford ne propose qu'un seul diplôme (MSCS) avec des spécialisations nommées**, pas plusieurs masters séparés.
-  - Quelques programmes mentionnés par les universités elles-mêmes n'ont pas pu être retrouvés avec une URL fiable (signalé explicitement dans le fichier plutôt que d'inventer un lien).
+- [`docs/universites-cibles.md`](docs/universites-cibles.md) — 20 universités cibles (10 UK + 10 US, QS 2026 CS). Rangs 8-10 de chaque liste à confirmer.
+- [`docs/masters-urls.md`](docs/masters-urls.md) — ~96 programmes avec leurs URLs.
+- [`docs/criteres-admission.md`](docs/criteres-admission.md) — **NOUVEAU, extraction complète (96/96 programmes)** : classification/GPA, anglais requis, deadline, coût annuel, autres pièces, extraits des vraies pages via Claude for Chrome.
+
+**Constats importants issus de l'extraction :**
+- **Beaucoup de champs "non trouvé", surtout côté US.** Les universités britanniques affichent en général tout sur une seule page. Les universités américaines (MIT, Stanford, CMU, Princeton, Cornell, Caltech, UIUC, Michigan, une partie de Georgia Tech) renvoient les critères chiffrés vers des sous-pages séparées ("Admissions Requirements", "Tuition and Fees", "How to Apply") non couvertes par les URLs de départ — **une passe complémentaire ciblée sur ces sous-pages est nécessaire** pour compléter les GPA/TOEFL/deadlines/coûts manquants côté US.
+- **MIT et Caltech confirmés sans master terminal ouvert aux candidats externes** (MEng EECS MIT réservé aux étudiants internes ; Caltech MS uniquement en cours de PhD).
+- Plusieurs deadlines UK sont déjà passées ou les candidatures sont fermées au moment de l'extraction (fin août 2026) — à revérifier à la réouverture des cycles 2027.
+- Erreurs techniques ponctuelles : page Stanford "Master's Admissions" inaccessible (403), 2 pages MIT redirigées vers une page générique sans détail.
 
 ### Pas encore fait
-- **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com (bloqué depuis cet environnement, à faire manuellement ou depuis un autre outil).
-- **Extraction des critères d'admission réels** : bloquée par la restriction réseau `.ac.uk`/`.edu` de cet environnement (voir encadré ci-dessus) — aucun critère (GPA, IELTS, deadline, coût) n'a pu être extrait automatiquement pour l'instant.
-- **1ère année (Part I)** : catalogue de modules encore placeholder, en attente des vraies données Lancaster.
+- **Compléter les "non trouvé" côté US** via une passe ciblée sur les sous-pages Admissions/Tuition/How-to-Apply.
+- **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
+- **Intégrer `criteres-admission.md` dans le prototype** : le prototype utilise encore des données d'exemple, pas ces vraies données — il faut convertir ce tableau markdown en données structurées (JS) et les brancher sur le moteur de matching existant.
+- **1ère année (Part I)** de l'étudiant pilote : catalogue de modules encore placeholder.
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
-- **Pondération Coursework/Exam** : déduite approximativement des vraies notes de l'étudiant pilote, pas la formule officielle exacte de Lancaster.
-- **Adoption étudiante** : réflexion produit évoquée mais pas creusée (comment convaincre d'autres étudiants Lancaster d'utiliser l'outil).
+- **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
+- **Adoption étudiante** : réflexion produit évoquée mais pas creusée.
+- **Bourses réelles** : toujours des données d'exemple (Fulbright, Chevening...), pas encore de vraie collecte de critères de bourses.
 
 ## 4. Prochaines étapes proposées
 
-1. ~~Identifier les 10 meilleures universités UK + 10 meilleures universités US en Computer Science~~ — fait, voir [`docs/universites-cibles.md`](docs/universites-cibles.md) (à valider sur les rangs 8-10).
-2. ~~Repérer les URLs des pages d'admission Master de chacune des 20 universités~~ — fait (première passe), voir [`docs/masters-urls.md`](docs/masters-urls.md) (à valider, URLs non fetchées directement).
-3. **Extraire les vrais critères d'admission** — bloqué par le réseau depuis cet environnement. Prochaine tentative : demander à l'utilisateur de copier-coller le contenu de 5-10 pages prioritaires (ou d'envoyer des captures d'écran), plutôt que de compter sur WebFetch.
-4. Choisir la méthode d'extraction définitive (Gemini free tier vs Claude vs open source) selon le budget et le volume réel.
-5. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote pour compléter le relevé interactif.
-6. Concevoir le vrai modèle de données (étudiant, université, Master, critère d'admission, bourse) et l'architecture backend.
-7. Recruter un ou plusieurs étudiants Lancaster CS testeurs pour valider le concept avec de vraies données.
+1. ~~Identifier les 20 universités cibles~~ — fait, voir [`universites-cibles.md`](docs/universites-cibles.md).
+2. ~~Repérer les URLs des Masters~~ — fait, voir [`masters-urls.md`](docs/masters-urls.md).
+3. ~~Extraire les critères d'admission réels~~ — fait pour 96/96 programmes (beaucoup de champs "non trouvé" côté US à compléter), voir [`criteres-admission.md`](docs/criteres-admission.md).
+4. **Compléter les critères manquants côté US** (sous-pages Admissions/Tuition/How-to-Apply non couvertes en premier passage).
+5. **Brancher les vraies données sur le prototype** (remplacer les données d'exemple par `criteres-admission.md` converti en JS).
+6. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote.
+7. Collecter les vraies bourses (critères, montants, deadlines) — même méthode que pour les Masters.
+8. Concevoir le vrai modèle de données et l'architecture backend (au-delà du prototype front-end seul).
+9. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
 
 ## 5. Structure du dépôt
 
@@ -84,13 +81,17 @@ Données de référence collectées :
 ├── docs/
 │   ├── cahier-des-charges.md       # spécification initiale du projet
 │   ├── universites-cibles.md       # les 20 universités cibles (UK/US, Computer Science)
-│   └── masters-urls.md             # URLs des Masters (cluster tech) par université — brouillon
+│   ├── masters-urls.md             # URLs des Masters (cluster tech) par université
+│   └── criteres-admission.md       # critères d'admission réels extraits (96/96 programmes)
 └── prototype/
     └── route-du-futur.html         # prototype interactif (ouvrir dans un navigateur)
 ```
 
 ## 6. Note pour toute IA qui reprend ce projet
 
-Lis ce README en entier avant de proposer quoi que ce soit — il résume toutes les décisions déjà prises et pourquoi, pour éviter de refaire les mêmes débats (choix du LLM, format des notes, design visuel...). Le prototype HTML est autonome (pas de dépendances à installer) : ouvre-le directement dans un navigateur pour voir l'état actuel de l'interface. Après toute modification significative (nouvelle fonctionnalité, décision d'architecture, changement de direction), mets à jour la section 3 de ce README avant de terminer la session.
+Lis ce README en entier avant de proposer quoi que ce soit. Le prototype HTML est autonome (pas de dépendances) : ouvre-le directement dans un navigateur. Après toute modification significative, mets à jour la section 3 de ce README avant de terminer la session.
 
-**Point d'attention technique confirmé (ne pas re-tester)** : dans cet environnement d'exécution, WebFetch est bloqué (EGRESS_BLOCKED) pour tous les domaines `.ac.uk` et `.edu` testés à ce jour — testé sur 8 universités différentes (UK et US), échec systématique. Si tu es une nouvelle session dans le même environnement, ne perds pas de temps à retester WebFetch sur ces domaines : demande plutôt à l'utilisateur de coller le contenu texte ou une capture d'écran des pages, ou vérifie si l'environnement a changé.
+**Points d'attention technique confirmés (ne pas re-tester) :**
+- WebFetch est bloqué (EGRESS_BLOCKED) pour tous les domaines `.ac.uk`/`.edu` testés dans cet environnement — testé sur 8+ universités, échec systématique.
+- **Solution qui fonctionne** : demander à l'utilisateur d'utiliser Claude for Chrome (extension navigateur, tourne sur son propre réseau, sans ce blocage) pour visiter les pages et coller le résultat en texte ici. C'est comme ça que `criteres-admission.md` a été rempli.
+- Attention en cas de reprise après une longue pause utilisateur ("j'ai atteint ma limite d'usage") : vérifier si le message concerne bien cette session-ci ou une autre session Claude en parallèle (Claude for Chrome notamment) — ça a déjà causé une confusion.
