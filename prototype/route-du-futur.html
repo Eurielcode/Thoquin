@@ -10,6 +10,7 @@
     --warn:#FF9600; --warn-b:#CC7A00; --warn-bg:#FFEFDA;
     --stretch:#CE82FF; --stretch-b:#A25CDB; --stretch-bg:#F6EAFF;
     --danger:#FF4B4B; --danger-b:#D63333; --danger-bg:#FFE7E7;
+    --neutral:#8B8A7E; --neutral-b:#6F6E62; --neutral-bg:#EDECE5;
     --scrim:rgba(60,59,51,.4);
   }
   @media (prefers-color-scheme:dark){
@@ -21,6 +22,7 @@
       --warn:#FFA733; --warn-b:#D6860E; --warn-bg:#3A2A14;
       --stretch:#D99BFF; --stretch-b:#B575E8; --stretch-bg:#332040;
       --danger:#FF7070; --danger-b:#DE4B4B; --danger-bg:#3A1E1E;
+      --neutral:#A6A497; --neutral-b:#84826F; --neutral-bg:#2A2B22;
       --scrim:rgba(0,0,0,.6);
     }
   }
@@ -32,6 +34,7 @@
     --warn:#FFA733; --warn-b:#D6860E; --warn-bg:#3A2A14;
     --stretch:#D99BFF; --stretch-b:#B575E8; --stretch-bg:#332040;
     --danger:#FF7070; --danger-b:#DE4B4B; --danger-bg:#3A1E1E;
+    --neutral:#A6A497; --neutral-b:#84826F; --neutral-bg:#2A2B22;
     --scrim:rgba(0,0,0,.6);
   }
 
@@ -116,8 +119,13 @@
   }
 
   /* ---------- Board (Masters) ---------- */
-  .board{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start; }
-  @media (max-width:880px){ .board{ grid-template-columns:1fr; } }
+  .board{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:start; }
+  @media (max-width:1100px){ .board{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .board{ grid-template-columns:1fr; } }
+  .excluded-note{
+    font-size:.8rem; font-weight:700; color:var(--ink-muted); background:var(--surface-2);
+    border-radius:12px; padding:10px 16px; margin-top:18px;
+  }
 
   .column-head{
     display:flex; align-items:center; gap:10px; padding:10px 14px;
@@ -398,6 +406,7 @@
 
   <section id="view-masters" style="display:none;">
     <div class="board" id="board"></div>
+    <div class="excluded-note">MIT (MEng EECS) et Caltech ne proposent pas de master ouvert aux candidats externes (diplôme réservé aux étudiants internes / décerné en cours de doctorat) &mdash; exclus de cette liste.</div>
   </section>
 
   <section id="view-schol" style="display:none;">
@@ -616,36 +625,304 @@ document.getElementById('ielts-input').addEventListener('input', (e) => {
   renderBoard();
 });
 
+// Données réelles extraites des pages d'admission (voir docs/criteres-admission.md du dépôt).
+// reqAvg/reqIelts = null quand l'info n'a pas été trouvée sur la page — jamais estimé/inventé.
+// Conversion classification UK -> reqAvg : First=70, 2:1=60, "bon/strong 2:1"=65, 2:2=50.
+// Conversion GPA US -> reqAvg (uniquement quand un minimum explicite était donné) : GPA x 20.
 const MASTERS = [
-  { id:'ed-ai', uni:'University of Edinburgh', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
-    reqAvg:62, reqLabel:'2:1 (62/100)', reqIelts:6.5, cost:'£32 400 / an', deadline:'2026-06-30',
-    other:['Lettre de motivation','1 lettre de référence académique'] },
-  { id:'man-ds', uni:'University of Manchester', program:'MSc Data Science', country:'UK', tags:['Data Science'],
-    reqAvg:60, reqLabel:'2:1 (60/100)', reqIelts:6.5, cost:'£29 500 / an', deadline:'2026-07-15',
-    other:['Lettre de motivation','Portfolio de projets (optionnel)'] },
-  { id:'gt-cs', uni:'Georgia Institute of Technology', program:'MS Computer Science', country:'US', tags:['Software Engineering'],
-    reqAvg:64, reqLabel:'≈ 3.4 GPA', reqIelts:7.0, cost:'$32 000 / an', deadline:'2026-03-01',
-    other:['3 lettres de recommandation','Relevé de notes officiel'] },
+  // ---- University of Oxford ----
+  { id:'ox-acs', uni:'University of Oxford', program:'MSc Advanced Computer Science', country:'UK', tags:['IA','Computer Science'],
+    reqAvg:70, reqLabel:'First-class', reqIelts:7.5, englishNote:'IELTS 7.5 (TOEFL iBT 110)', cost:'£43 730 / an (Overseas)',
+    deadline:'Candidatures 2026-27 fermées — pas de date affichée', other:['3 lettres de recommandation','CV (1-2 pages)','Statement of purpose (max 1000 mots)','Entretien possible (~25 min)','Pas de GRE/GMAT'] },
+  { id:'ox-mfcs', uni:'University of Oxford', program:'MSc Mathematics and Foundations of Computer Science', country:'UK', tags:['Computer Science'],
+    reqAvg:70, reqLabel:'First-class (maths)', reqIelts:7.5, englishNote:'IELTS 7.5 (TOEFL iBT 110)', cost:'£43 730 / an (Overseas)',
+    deadline:'Candidatures 2026-27 fermées', other:['3 lettres (min. 2 académiques)','Statement of purpose (max 1000 mots)','Entretien possible'] },
+  { id:'ox-se', uni:'University of Oxford', program:'MSc Software Engineering (temps partiel)', country:'UK', tags:['Software Engineering'],
+    reqAvg:60, reqLabel:'2:1 (ou First, ou 2 ans exp. pro)', reqIelts:7.5, englishNote:'IELTS 7.5 (TOEFL iBT 110)', cost:"Frais d'inscription £22 330 + £3 280/module",
+    deadline:'Candidatures 2026-27 fermées', other:['3 lettres','CV (1-2 pages)','Statement of purpose (max 500 mots)','Entretien (~20-30 min, en ligne)'] },
+  { id:'ox-sss', uni:'University of Oxford', program:'MSc Software and Systems Security (NCSC, temps partiel)', country:'UK', tags:['Cybersécurité'],
+    reqAvg:60, reqLabel:'2:1 (ou First, ou 2 ans exp. pro)', reqIelts:7.5, englishNote:'IELTS 7.5 (TOEFL iBT 110)', cost:"Frais d'inscription £22 330 + £3 280/module",
+    deadline:'Candidatures 2026-27 fermées', other:['3 lettres','CV','Statement of purpose (max 500 mots)','Entretien (~20-30 min)'] },
 
-  { id:'icl-ai', uni:'Imperial College London', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
-    reqAvg:70, reqLabel:'First (70/100)', reqIelts:7.0, cost:'£38 500 / an', deadline:'2026-01-15',
-    other:['Lettre de motivation','2 lettres de référence'] },
-  { id:'ucl-dsml', uni:'University College London', program:'MSc Data Science & Machine Learning', country:'UK', tags:['Data Science','IA'],
-    reqAvg:66, reqLabel:'2:1 haut (66/100)', reqIelts:8.0, cost:'£34 900 / an', deadline:'2026-01-31',
-    other:['Lettre de motivation','Entretien technique'] },
-  { id:'cmu-infosec', uni:'Carnegie Mellon University', program:'MS Information Security', country:'US', tags:['Cybersécurité'],
-    reqAvg:72, reqLabel:'≈ 3.7 GPA', reqIelts:7.5, cost:'$46 000 / an', deadline:'2026-02-10',
-    other:['3 lettres de recommandation','Essai personnel'] },
+  // ---- University of Cambridge ----
+  { id:'cam-acs', uni:'University of Cambridge', program:'MPhil Advanced Computer Science', country:'UK', tags:['Computer Science'],
+    reqAvg:70, reqLabel:'First Class Honours', reqIelts:7.5, englishNote:'IELTS 7.5 (TOEFL iBT 107)', cost:'non trouvé',
+    deadline:'Clôture 26 fév. 2026 (Michaelmas 2026)', other:['Contact : cst-graduate-admissions@cst.cam.ac.uk pour le détail des pièces'] },
+  { id:'cam-mlmi', uni:'University of Cambridge', program:'MPhil Machine Learning and Machine Intelligence', country:'UK', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'3 déc. 2025 (Michaelmas 2026)', other:['non trouvé sur cette page'] },
+  { id:'cam-dis', uni:'University of Cambridge', program:'MPhil Data Intensive Science', country:'UK', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'14 mai 2026', other:['non trouvé sur cette page'] },
+  { id:'cam-sc', uni:'University of Cambridge', program:'MPhil Scientific Computing', country:'UK', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'14 mai 2026', other:['non trouvé sur cette page'] },
 
-  { id:'ox-cs', uni:'University of Oxford', program:'MSc Computer Science', country:'UK', tags:['IA','Software Engineering'],
-    reqAvg:76, reqLabel:'First solide (76/100)', reqIelts:7.5, cost:'£41 000 / an', deadline:'2026-01-06',
-    other:['2 lettres de référence académiques','Entretien'] },
-  { id:'stan-cs', uni:'Stanford University', program:'MS Computer Science (piste IA)', country:'US', tags:['IA'],
-    reqAvg:78, reqLabel:'≈ 3.9 GPA', reqIelts:8.0, cost:'$58 000 / an', deadline:'2025-12-01',
-    other:['3 lettres de recommandation','GRE recommandé'] },
-  { id:'mit-meng', uni:'Massachusetts Institute of Technology', program:'MEng in Computer Science', country:'US', tags:['Software Engineering','IA'],
-    reqAvg:80, reqLabel:'≈ 3.95 GPA', reqIelts:8.0, cost:'$59 000 / an', deadline:'2025-12-15',
-    other:['Doit être admis au préalable en 4e année MIT (voie spécifique)'] },
+  // ---- Imperial College London ----
+  { id:'imp-comp', uni:'Imperial College London', program:'MSc Computing', country:'UK', tags:['Computer Science'],
+    reqAvg:70, reqLabel:'First-class (hors Computing/CS)', reqIelts:null, englishNote:'non précisé sur cette page', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — candidatures pas encore ouvertes', other:['non trouvé sur cette page'] },
+  { id:'imp-adv', uni:'Imperial College London', program:'MSc Advanced Computing', country:'UK', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'"excellent students" (non chiffré)', reqIelts:null, englishNote:'non précisé', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['Contact : doc-mscadmissions@imperial.ac.uk'] },
+  { id:'imp-ai', uni:'Imperial College London', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
+    reqAvg:70, reqLabel:'First-class', reqIelts:null, englishNote:'non précisé sur cette page', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['2 références académiques (fortement préférées)','Pas de GRE, pas d’entretien'] },
+  { id:'imp-aiml', uni:'Imperial College London', program:'MSc in Computing (AI and Machine Learning)', country:'UK', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non précisé', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['non trouvé sur cette page'] },
+  { id:'imp-se', uni:'Imperial College London', program:'MSc in Computing (Software Engineering)', country:'UK', tags:['Software Engineering'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non précisé', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['non trouvé sur cette page'] },
+  { id:'imp-sr', uni:'Imperial College London', program:'MSc in Computing (Security and Reliability)', country:'UK', tags:['Cybersécurité'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non précisé', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['non trouvé sur cette page'] },
+  { id:'imp-vcr', uni:'Imperial College London', program:'MSc in Computing (Visual Computing and Robotics)', country:'UK', tags:['Robotique'],
+    reqAvg:null, reqLabel:'"good academic degree" (non chiffré)', reqIelts:null, englishNote:'non précisé', cost:'non trouvé',
+    deadline:'Rentrée sept. 2026 — pas encore ouvert', other:['non trouvé sur cette page'] },
+
+  // ---- University of Edinburgh ----
+  { id:'ed-cs', uni:'University of Edinburgh', program:'Computer Science MSc', country:'UK', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'2:1 (offre typique : First)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL-iBT 100)', cost:'non trouvé',
+    deadline:'30 mars 2026 (rentrée 14 sept. 2026)', other:['Personal statement','Relevés et diplômes','Références'] },
+  { id:'ed-ai', uni:'University of Edinburgh', program:'Artificial Intelligence MSc', country:'UK', tags:['IA'],
+    reqAvg:60, reqLabel:'2:1 (offre typique : First)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL-iBT 100)', cost:'non trouvé',
+    deadline:'31 mars 2026 (rentrée 14 sept. 2026)', other:['Personal statement','1 lettre de recommandation (minimum)'] },
+  { id:'ed-ds', uni:'University of Edinburgh', program:'Data Science MSc', country:'UK', tags:['Data Science'],
+    reqAvg:60, reqLabel:'2:1 (offre typique : First)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL-iBT 100)', cost:'non trouvé',
+    deadline:'31 mars 2026 (rentrée sept. 2026)', other:['Personal statement','Diplômes/relevés','Références'] },
+  { id:'ed-csp', uni:'University of Edinburgh', program:'Cyber Security, Privacy and Trust MSc', country:'UK', tags:['Cybersécurité'],
+    reqAvg:60, reqLabel:'2:1 (offre typique : First)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL-iBT 100)', cost:'non trouvé',
+    deadline:'31 mars 2026 (rentrée 14 sept. 2026)', other:['Personal statement','Certificats de diplôme et relevés'] },
+  { id:'ed-aie', uni:'University of Edinburgh', program:'Data and Artificial Intelligence Ethics MSc', country:'UK', tags:['IA'],
+    reqAvg:60, reqLabel:'2:1, toute discipline', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL-iBT 100)', cost:'non trouvé (coût de vie estimé £18 504/an)',
+    deadline:'Programme actuellement fermé (réouverture habituelle en octobre)', other:['Personal statement (obligatoire)'] },
+
+  // ---- UCL ----
+  { id:'ucl-cs', uni:'UCL', program:'Computer Science MSc', country:'UK', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'2:1 (hors informatique)', reqIelts:null, englishNote:'"Level 2" UCL (score précis non affiché)', cost:'£42 700 / an',
+    deadline:'27 mars 2026 (avec visa) / 28 août 2026 (sans visa) — fermées', other:['2 références académiques','Personal statement (1 page A4)','Frais de candidature £90'] },
+  { id:'ucl-ml', uni:'UCL', program:'Machine Learning MSc', country:'UK', tags:['IA'],
+    reqAvg:60, reqLabel:'2:1 (discipline quantitative)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 références académiques/pro','Personal statement','Frais £90'] },
+  { id:'ucl-aide', uni:'UCL', program:'Artificial Intelligence and Data Engineering MSc', country:'UK', tags:['IA','Data Science'],
+    reqAvg:60, reqLabel:'2:1 (informatique/maths)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 lettres de recommandation','Personal statement (expérience en programmation)'] },
+  { id:'ucl-dsml', uni:'UCL', program:'Data Science and Machine Learning MSc', country:'UK', tags:['Data Science','IA'],
+    reqAvg:60, reqLabel:'2:1 (discipline hautement quantitative)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 références','Note sur algèbre linéaire/calcul/probas/stats'] },
+  { id:'ucl-rai', uni:'UCL', program:'Robotics and Artificial Intelligence MSc', country:'UK', tags:['Robotique','IA'],
+    reqAvg:60, reqLabel:'2:1 (discipline fortement quantitative)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 références','Frais de candidature £90'] },
+  { id:'ucl-csml', uni:'UCL', program:'Computational Statistics and Machine Learning MSc', country:'UK', tags:['IA','Data Science'],
+    reqAvg:60, reqLabel:'2:1 (discipline hautement quantitative)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 lettres de recommandation','Personal statement'] },
+  { id:'ucl-cgvi', uni:'UCL', program:'Computer Graphics, Vision and Imaging MSc', country:'UK', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'2:1 (info/maths/génie électrique/physique)', reqIelts:null, englishNote:'"Level 2" UCL', cost:'£42 700 / an',
+    deadline:'27 mars 2026 / 28 août 2026 — fermées', other:['2 références','Détails d’expérience en programmation'] },
+
+  // ---- University of Manchester ----
+  { id:'man-cs', uni:'University of Manchester', program:'MSc Computer Science (page département)', country:'UK', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['Contact : pgt.compsci@manchester.ac.uk'] },
+  { id:'man-acs', uni:'University of Manchester', program:'MSc Advanced Computer Science', country:'UK', tags:['Computer Science'],
+    reqAvg:70, reqLabel:'First-class (70% moyenne)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL iBT 100)', cost:'£39 400 / an',
+    deadline:'4 étapes, 1ère le 7 nov. 2025', other:['Relevés officiels + traductions','Certificat de diplôme'] },
+  { id:'man-ai', uni:'University of Manchester', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['Page axée contenu/débouchés, pas critères'] },
+  { id:'man-ml', uni:'University of Manchester', program:'MSc Machine Learning', country:'UK', tags:['IA'],
+    reqAvg:70, reqLabel:'First-class (70% moyenne)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL iBT 100)', cost:'£39 400 / an',
+    deadline:'4 étapes, 1ère le 7 nov. 2025', other:['Relevés officiels','CV si diplômé +3 ans'] },
+  { id:'man-cyb', uni:'University of Manchester', program:'MSc Cyber Security', country:'UK', tags:['Cybersécurité'],
+    reqAvg:70, reqLabel:'First-class (70% moyenne)', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL iBT 100)', cost:'£39 400 / an',
+    deadline:'4 étapes, 1ère le 7 nov. 2025', other:['Relevés officiels','Certificat de diplôme'] },
+  { id:'man-ds', uni:'University of Manchester', program:'MSc Data Science (Computer Science Data Informatics)', country:'UK', tags:['Data Science'],
+    reqAvg:65, reqLabel:'High 2:1', reqIelts:7.0, englishNote:'IELTS 7.0 (TOEFL iBT 100)', cost:'£35 200 / an',
+    deadline:'4 étapes, 1ère le 7 déc. 2025', other:['non trouvé'] },
+  { id:'man-rob', uni:'University of Manchester', program:'MSc Robotics', country:'UK', tags:['Robotique'],
+    reqAvg:65, reqLabel:'First ou strong 2:1 (65%)', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90)', cost:'£38 400 / an',
+    deadline:'5 étapes, 1ère le 24 oct. 2025', other:['1 lettre académique','CV si diplômé +3 ans'] },
+
+  // ---- King's College London ----
+  { id:'kcl-ds', uni:"King's College London", program:'Data Science MSc', country:'UK', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+  { id:'kcl-ai', uni:"King's College London", program:'Artificial Intelligence MSc', country:'UK', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+  { id:'kcl-ac', uni:"King's College London", program:'Advanced Computing MSc', country:'UK', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+  { id:'kcl-cyb', uni:"King's College London", program:'Cyber Security MSc (certifié NCSC)', country:'UK', tags:['Cybersécurité'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+  { id:'kcl-ase', uni:"King's College London", program:'Advanced Software Engineering MSc', country:'UK', tags:['Software Engineering'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+  { id:'kcl-aisci', uni:"King's College London", program:'Artificial Intelligence for Science MSc', country:'UK', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Page de présentation générale uniquement'] },
+
+  // ---- University of Bristol ----
+  { id:'bri-cs', uni:'University of Bristol', program:'MSc Computer Science (Conversion)', country:'UK', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'2:1 (hors informatique)', reqIelts:null, englishNote:'"Profile level E" (score précis non affiché)', cost:'£36 600 / an',
+    deadline:'13 août 2026 (intl) / 10 sept. 2026 (UK)', other:['CV si qualification post-diplôme pertinente'] },
+  { id:'bri-ds', uni:'University of Bristol', program:'MSc Data Science', country:'UK', tags:['Data Science'],
+    reqAvg:65, reqLabel:'Strong 2:1 (65%+)', reqIelts:null, englishNote:'"Profile C"', cost:'£36 500 / an',
+    deadline:'13 août 2026 (intl) / 10 sept. 2026 (UK)', other:['CV requis si diplôme sous les critères'] },
+  { id:'bri-dsb', uni:'University of Bristol', program:'MSc Data Science for Business', country:'UK', tags:['Data Science'],
+    reqAvg:60, reqLabel:'2:1 (discipline quantitative)', reqIelts:null, englishNote:'"Profile B"', cost:'£33 900 / an',
+    deadline:'13 août 2026 (intl) / 10 sept. 2026 (UK)', other:['CV si notes sous critères + 5 ans exp. pro'] },
+  { id:'bri-scds', uni:'University of Bristol', program:'MSc Scientific Computing with Data Science', country:'UK', tags:['Data Science'],
+    reqAvg:60, reqLabel:'2:1 (programme discontinué)', reqIelts:null, englishNote:'"Profile level E"', cost:'£36 500 / an',
+    deadline:'non trouvé', other:['Programme indiqué comme discontinué sur la page'] },
+  { id:'bri-cybss', uni:'University of Bristol', program:'MSc Cyber Security (Software Security)', country:'UK', tags:['Cybersécurité'],
+    reqAvg:60, reqLabel:'2:1', reqIelts:null, englishNote:'"Profile level D"', cost:'£36 600 / an',
+    deadline:'13 août 2026 (intl) / 2 sept. 2026 (UK/UE)', other:['CV si expérience/qualification pro pertinente'] },
+  { id:'bri-cybis', uni:'University of Bristol', program:'MSc Cyber Security (Infrastructures Security)', country:'UK', tags:['Cybersécurité'],
+    reqAvg:60, reqLabel:'2:1', reqIelts:null, englishNote:'"Profile level D"', cost:'£36 600 / an',
+    deadline:'13 août 2026 (intl) / 2 sept. 2026 (UK)', other:['CV recommandé'] },
+  { id:'bri-rob', uni:'University of Bristol', program:'MSc Robotics', country:'UK', tags:['Robotique'],
+    reqAvg:60, reqLabel:'2:1, toute discipline', reqIelts:null, englishNote:'"Profile level E"', cost:'£36 500 / an',
+    deadline:'13 août 2026 (intl) / 10 sept. 2026 (UK)', other:['Module de programmation obligatoire (C/C++, Java, Python, MATLAB)'] },
+  { id:'bri-arob', uni:'University of Bristol', program:'MSc Aerial Robotics', country:'UK', tags:['Robotique'],
+    reqAvg:60, reqLabel:'2:1, toute discipline', reqIelts:null, englishNote:'"Profile level E"', cost:'£36 500 / an',
+    deadline:'13 août 2026 (intl) / 10 sept. 2026 (UK)', other:['Preuve d’expérience en programmation'] },
+
+  // ---- University of Southampton ----
+  { id:'sou-cs', uni:'University of Southampton', program:'MSc Computer Science', country:'UK', tags:['Computer Science'],
+    reqAvg:65, reqLabel:'Bon 2:1 (65%)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£36 800 / an + dépôt £2 000',
+    deadline:'19 août 2026 (intl) / 2 sept. 2026 (UK)', other:['Personal statement','Pas de lettres de recommandation requises'] },
+  { id:'sou-ai', uni:'University of Southampton', program:'MSc Artificial Intelligence', country:'UK', tags:['IA'],
+    reqAvg:65, reqLabel:'Upper 2:1 (65%+)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£36 800 / an + dépôt £2 000',
+    deadline:'19 août 2026 (intl) / 2 sept. 2026 (UK)', other:['Personal statement'] },
+  { id:'sou-cyb', uni:'University of Southampton', program:'MSc Cyber Security', country:'UK', tags:['Cybersécurité'],
+    reqAvg:65, reqLabel:'Upper 2:1 (65%+)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£36 800 / an',
+    deadline:'19 août 2026 (intl) / 2 sept. 2026 (UK)', other:['Personal statement','Entretien possible (sur invitation)'] },
+  { id:'sou-ds', uni:'University of Southampton', program:'MSc Data Science', country:'UK', tags:['Data Science'],
+    reqAvg:65, reqLabel:'Upper 2:1 (65%+)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£36 800 / an + dépôt £2 000',
+    deadline:'19 août 2026 (intl) / 2 sept. 2026 (UK)', other:['Personal statement'] },
+  { id:'sou-se', uni:'University of Southampton', program:'MSc Software Engineering', country:'UK', tags:['Software Engineering'],
+    reqAvg:65, reqLabel:'Upper 2:1 (65%+)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£35 000 / an (intl)',
+    deadline:'19 août 2026 (intl) / 2 sept. 2026 (UK)', other:['Personal statement'] },
+
+  // ---- University of Glasgow ----
+  { id:'gla-cs', uni:'University of Glasgow', program:'Computing Science MSc', country:'UK', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'2.1 Hons', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90-92)', cost:'£34 470 / an',
+    deadline:'24 août 2026', other:['1 lettre de recommandation','Diplôme + relevés traduits'] },
+  { id:'gla-ds', uni:'University of Glasgow', program:'Data Science MSc', country:'UK', tags:['Data Science'],
+    reqAvg:60, reqLabel:'2.1 Hons', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90-92)', cost:'£34 470 / an + dépôt £2 000',
+    deadline:'24 août 2026', other:['1 lettre de recommandation'] },
+  { id:'gla-sd', uni:'University of Glasgow', program:'Software Development MSc', country:'UK', tags:['Software Engineering'],
+    reqAvg:60, reqLabel:'2.1 Hons (ou 2.2 + 8 ans exp.)', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90-92)', cost:'£34 470 / an',
+    deadline:'24 août 2026', other:['1 lettre de recommandation'] },
+  { id:'gla-rai', uni:'University of Glasgow', program:'Robotics & AI MSc', country:'UK', tags:['Robotique','IA'],
+    reqAvg:60, reqLabel:'2.1 Hons', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90-92)', cost:'£34 470 / an',
+    deadline:'24 août 2026', other:['1 lettre de recommandation'] },
+  { id:'gla-raidd', uni:'University of Glasgow', program:'Robotics & AI (double diplôme, Gadjah Mada) MSc', country:'UK', tags:['Robotique','IA'],
+    reqAvg:null, reqLabel:'GPA 3.5/4.0 pour transfert (entrée directe non précisée)', reqIelts:6.5, englishNote:'IELTS 6.5', cost:'£34 470 / an (année Glasgow) + bourse 20%',
+    deadline:'non trouvé', other:['1 lettre de recommandation'] },
+  { id:'gla-geo', uni:'University of Glasgow', program:'Geospatial Data Science & Modelling MSc', country:'UK', tags:['Data Science'],
+    reqAvg:50, reqLabel:'2.2 Hons', reqIelts:6.5, englishNote:'IELTS 6.5 (TOEFL iBT 90-92)', cost:'£31 050 / an',
+    deadline:'24 août 2026', other:['1 lettre de recommandation'] },
+
+  // ---- MIT ---- (MEng EECS exclu : réservé aux étudiants internes)
+  { id:'mit-cse', uni:'MIT', program:'MS Computational Science and Engineering', country:'US', tags:['Computer Science','Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['Page portail sans détail — voir oge.mit.edu'] },
+  { id:'mit-eecs', uni:'MIT', program:'EECS Graduate Programs (SM/MEng)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['4 programmes distincts, détails non listés sur cette page'] },
+
+  // ---- Stanford ----
+  { id:'stan-mscs', uni:'Stanford University', program:'MS in Computer Science (MSCS)', country:'US', tags:['Computer Science','IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['45 unités, ~1,5 an — spécialisations nommées (IA, Sécurité, Systems, HCI...)'] },
+  { id:'stan-online', uni:'Stanford University', program:'MS Computer Science (en ligne, temps partiel)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['non trouvé sur cette page'] },
+
+  // ---- Carnegie Mellon ----
+  { id:'cmu-mscs', uni:'Carnegie Mellon University', program:'Master of Science in Computer Science (MSCS)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé (critères variables par piste)', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['Voir csd.cmu.edu/education/master'] },
+  { id:'cmu-ml', uni:'Carnegie Mellon University', program:"Master's in Machine Learning", country:'US', tags:['IA'],
+    reqAvg:null, reqLabel:'GPA moyen des admis 3.9 (pas un minimum)', reqIelts:null, englishNote:'TOEFL moyen 111 (pas un minimum)', cost:'non trouvé',
+    deadline:'Généralement fin nov./début déc.', other:['GRE optionnel'] },
+  { id:'cmu-msaii', uni:'Carnegie Mellon University', program:'MS in Artificial Intelligence and Innovation (MSAII)', country:'US', tags:['IA'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'cmu-mcds', uni:'Carnegie Mellon University', program:'Master of Computational Data Science (MCDS)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'cmu-mse', uni:'Carnegie Mellon University', program:'Master of Software Engineering (MSE)', country:'US', tags:['Software Engineering'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'cmu-msis', uni:'Carnegie Mellon University', program:'MS in Information Security (MSIS)', country:'US', tags:['Cybersécurité'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'cmu-msr', uni:'Carnegie Mellon University', program:'MS in Robotics (MSR)', country:'US', tags:['Robotique'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'Portail ouvert du 9 sept. au 9 déc. 2026', other:['GRE optionnel','CV, lettres acceptées'] },
+  { id:'cmu-mrsd', uni:'Carnegie Mellon University', program:'MS Robotic Systems Development (MRSD)', country:'US', tags:['Robotique'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+
+  // ---- UC Berkeley ----
+  { id:'ucb-eecs', uni:'UC Berkeley', program:'MS/PhD EECS (voie recherche)', country:'US', tags:['Computer Science'],
+    reqAvg:60, reqLabel:'GPA min. 3.0/4.0', reqIelts:null, englishNote:'Preuve d’anglais requise (score non précisé)', cost:'non trouvé',
+    deadline:'1er déc. (cycle 2027)', other:['3 lettres de recommandation','Statement of purpose','Pas de GRE'] },
+  { id:'ucb-meng', uni:'UC Berkeley', program:'Master of Engineering (Fung Institute)', country:'US', tags:['Computer Science','Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'ucb-mids', uni:'UC Berkeley', program:'Master of Information and Data Science (MIDS, en ligne)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'TOEFL mentionné, score non précisé', cost:'non trouvé',
+    deadline:'non trouvé', other:['2 lettres pro','CV','GRE optionnel'] },
+  { id:'ucb-mics', uni:'UC Berkeley', program:'Master of Information and Cybersecurity (MICS, en ligne)', country:'US', tags:['Cybersécurité'],
+    reqAvg:null, reqLabel:'"academic coursework and performance" (pas de seuil)', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['CV, statement of purpose, 2 lettres pro'] },
+  { id:'ucb-5mids', uni:'UC Berkeley', program:'5th Year Master of Information and Data Science', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+
+  // ---- Georgia Tech ----
+  { id:'gt-cs', uni:'Georgia Institute of Technology', program:'Master of Science in Computer Science', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé (3.0 = pour diplômer, pas pour entrer)', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'1er février', other:['GRE','Statement of purpose','Lettres de recommandation'] },
+  { id:'gt-cyb', uni:'Georgia Institute of Technology', program:'Master of Science in Cybersecurity', country:'US', tags:['Cybersécurité'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['3 spécialisations proposées'] },
+  { id:'gt-msa', uni:'Georgia Institute of Technology', program:'Master of Science in Analytics (MSA/OMSA)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'gt-rob', uni:'Georgia Institute of Technology', program:'Master of Science in Robotics', country:'US', tags:['Robotique'],
+    reqAvg:66, reqLabel:'GPA min. 3.3 pour candidater', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+
+  // ---- Princeton ----
+  { id:'pri-cs', uni:'Princeton University', program:"Master's Program (MSE track) — Computer Science", country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'TOEFL 28 (oral) ou IELTS 8 (oral) — sous-score, pas score global', cost:'non trouvé',
+    deadline:'15 déc. 2025 (Fall 2026)', other:['Transcripts','Test d’anglais (TOEFL/IELTS/DET)'] },
+
+  // ---- Cornell ----
+  { id:'cor-meng', uni:'Cornell University', program:'Master of Engineering (MEng) in Computer Science', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Contact : meng@cs.cornell.edu'] },
+  { id:'cor-ms', uni:'Cornell University', program:'Master of Science (MS) in Computer Science (recherche)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['4 semestres, 34 crédits requis'] },
+  { id:'cor-mps-is', uni:'Cornell University', program:'MPS in Information Science', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['Contact : is-mps@cornell.edu'] },
+  { id:'cor-mps-asds', uni:'Cornell University', program:'MPS in Applied Statistics and Data Science', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+
+  // ---- UIUC ----
+  { id:'uiuc-mcs', uni:'University of Illinois Urbana-Champaign', program:'Master of Computer Science (MCS)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['GRE non requis — programme coursework-only'] },
+  { id:'uiuc-mcsds', uni:'University of Illinois Urbana-Champaign', program:'Online MCS in Data Science (MCS-DS)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'uiuc-ms', uni:'University of Illinois Urbana-Champaign', program:'MS in Computer Science (recherche)', country:'US', tags:['Computer Science'],
+    reqAvg:64, reqLabel:'GPA min. 3.20/4.00', reqIelts:null, englishNote:'TOEFL/IELTS requis (score enseignement seulement)', cost:'non trouvé',
+    deadline:'non trouvé', other:['GRE non requis'] },
+
+  // ---- University of Michigan ----
+  { id:'umi-cse', uni:'University of Michigan', program:'MS in Computer Science and Engineering (CSE)', country:'US', tags:['Computer Science'],
+    reqAvg:null, reqLabel:'GPA moyen des admis ≥3.5 (pas un minimum strict)', reqIelts:null, englishNote:'TOEFL min. 100', cost:'non trouvé',
+    deadline:'15 janvier', other:['3 lettres de recommandation','GRE si soumis'] },
+  { id:'umi-ds', uni:'University of Michigan', program:'MS in Data Science (Dept. of Statistics)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'umi-rob', uni:'University of Michigan', program:'MS in Robotics', country:'US', tags:['Robotique'],
+    reqAvg:null, reqLabel:'GPA moyen des admis 3.81 (pas un minimum)', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'15 janvier', other:['Academic statement of purpose','GRE optionnel'] },
+  { id:'umi-msi', uni:'University of Michigan', program:'Master of Science in Information (MSI)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé', deadline:'non trouvé', other:['non trouvé sur cette page'] },
+  { id:'umi-mads', uni:'University of Michigan', program:'Master of Applied Data Science (MADS, en ligne)', country:'US', tags:['Data Science'],
+    reqAvg:null, reqLabel:'non trouvé', reqIelts:null, englishNote:'non trouvé', cost:'non trouvé',
+    deadline:'non trouvé', other:['Pas de frais de candidature ni de GRE requis'] },
 ];
 
 const SCHOLARSHIPS = [
@@ -663,32 +940,39 @@ const SCHOLARSHIPS = [
     eligible:true, missing:null },
 ];
 
-function englishOk(m){ return STUDENT.englishExempt ? true : STUDENT.ielts >= m.reqIelts; }
+function englishOk(m){
+  if (STUDENT.englishExempt) return true;
+  if (m.reqIelts === null) return true; // inconnu -> on ne pénalise pas, mais on le signale ailleurs
+  return STUDENT.ielts >= m.reqIelts;
+}
 
 function classify(m){
+  if (m.reqAvg === null) return 'incomplete';
   const avgOk = STUDENT.avg >= m.reqAvg;
   const ieltsOk = englishOk(m);
   if (avgOk && ieltsOk) return 'accessible';
   const avgGap = m.reqAvg - STUDENT.avg;
-  const ieltsGap = STUDENT.englishExempt ? 0 : (m.reqIelts - STUDENT.ielts);
+  const ieltsGap = (!STUDENT.englishExempt && m.reqIelts !== null) ? (m.reqIelts - STUDENT.ielts) : 0;
   const worst = Math.max(avgGap/10, ieltsGap);
   return worst > 0.9 ? 'ambitieux' : 'consolider';
 }
 
 function gapText(m){
+  if (m.reqAvg === null) return null;
   const avgGap = m.reqAvg - STUDENT.avg;
   const parts = [];
   if (avgGap > 0) parts.push(`moyenne insuffisante de ${+avgGap.toFixed(1)} point${avgGap>1?'s':''} (${STUDENT.avg} vs ${m.reqAvg} requis)`);
-  if (!STUDENT.englishExempt) {
+  if (!STUDENT.englishExempt && m.reqIelts !== null) {
     const ieltsGap = +(m.reqIelts - STUDENT.ielts).toFixed(1);
     if (ieltsGap > 0) parts.push(`IELTS insuffisant de ${ieltsGap} point${ieltsGap>1?'s':''} (${STUDENT.ielts} vs ${m.reqIelts} requis)`);
   }
   return parts.length ? 'Écart : ' + parts.join(' · ') : null;
 }
 
+// Bourses uniquement : dates ISO connues, donc compte à rebours utilisable.
 function daysUntil(dateStr){
   const d = new Date(dateStr + 'T00:00:00');
-  const now = new Date('2026-08-31T00:00:00');
+  const now = new Date('2026-09-01T00:00:00');
   return Math.round((d - now) / 86400000);
 }
 function deadlineClass(days){
@@ -702,9 +986,10 @@ function fmtDate(dateStr){
 }
 
 const TONE = {
-  accessible: { color:'var(--ok)', border:'var(--ok-b)', bg:'var(--ok-bg)', label:'Accessible', icon:ICONS.check },
-  consolider: { color:'var(--warn)', border:'var(--warn-b)', bg:'var(--warn-bg)', label:'À consolider', icon:ICONS.bolt },
-  ambitieux:  { color:'var(--stretch)', border:'var(--stretch-b)', bg:'var(--stretch-bg)', label:'Ambitieux', icon:ICONS.star },
+  accessible:  { color:'var(--ok)', border:'var(--ok-b)', bg:'var(--ok-bg)', label:'Accessible', icon:ICONS.check },
+  consolider:  { color:'var(--warn)', border:'var(--warn-b)', bg:'var(--warn-bg)', label:'À consolider', icon:ICONS.bolt },
+  ambitieux:   { color:'var(--stretch)', border:'var(--stretch-b)', bg:'var(--stretch-bg)', label:'Ambitieux', icon:ICONS.star },
+  incomplete:  { color:'var(--neutral)', border:'var(--neutral-b)', bg:'var(--neutral-bg)', label:'Données incomplètes', icon:ICONS.lock },
 };
 
 const allTags = [...new Set(MASTERS.flatMap(m => m.tags))].sort();
@@ -719,11 +1004,11 @@ let state = { country:'all', tag:'all' };
 function renderBoard(){
   const board = document.getElementById('board');
   board.innerHTML = '';
-  const buckets = { accessible:[], consolider:[], ambitieux:[] };
+  const buckets = { accessible:[], consolider:[], ambitieux:[], incomplete:[] };
   MASTERS.filter(m => (state.country==='all'||m.country===state.country) && (state.tag==='all'||m.tags.includes(state.tag)))
     .forEach(m => buckets[classify(m)].push(m));
 
-  ['accessible','consolider','ambitieux'].forEach(key => {
+  ['accessible','consolider','ambitieux','incomplete'].forEach(key => {
     const tone = TONE[key];
     const col = document.createElement('div');
     col.innerHTML = `
@@ -742,10 +1027,15 @@ function renderBoard(){
 function renderCard(m, key){
   const tone = TONE[key];
   const gap = gapText(m);
-  const days = daysUntil(m.deadline);
   const btn = document.createElement('button');
   btn.className = 'card tile';
   btn.style.setProperty('--tone-b', tone.border);
+  const avgRow = m.reqAvg !== null
+    ? `<div class="metric-row"><span>Moyenne requise</span><b class="mono">${m.reqAvg}/100 (${m.reqLabel})</b></div>`
+    : `<div class="metric-row"><span>Moyenne requise</span><b class="mono">non trouvée</b></div>`;
+  const englishRow = STUDENT.englishExempt
+    ? `<div class="metric-row"><span>Anglais requis</span><b class="mono">Exempté ✓</b></div>`
+    : `<div class="metric-row"><span>Anglais requis</span><b class="mono">${m.reqIelts !== null ? 'IELTS ' + m.reqIelts.toFixed(1) : 'non trouvé'}</b></div>`;
   btn.innerHTML = `
     <div class="card-top">
       <div>
@@ -755,12 +1045,13 @@ function renderCard(m, key){
       <span class="badge-country">${m.country}</span>
     </div>
     <div class="tags">${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-    <div class="metric-row"><span>Moyenne requise</span><b class="mono">${m.reqAvg}/100</b></div>
-    <div class="metric-row"><span>Anglais requis</span><b class="mono">${STUDENT.englishExempt ? 'Exempté ✓' : 'IELTS ' + m.reqIelts.toFixed(1)}</b></div>
+    ${avgRow}
+    ${englishRow}
     ${gap ? `<div class="gap-line" style="--tone:${tone.color}; --tone-bg:${tone.bg};">${tone.icon}<span>${gap}</span></div>` : ''}
+    ${key === 'incomplete' ? `<div class="gap-line" style="--tone:${tone.color}; --tone-bg:${tone.bg};">${tone.icon}<span>Critères pas trouvés sur la page &mdash; à vérifier sur le site officiel</span></div>` : ''}
     <div class="card-foot">
       <span>${m.cost}</span>
-      <span class="deadline-pill ${deadlineClass(days)}">${fmtDate(m.deadline)}</span>
+      <span class="deadline-pill" style="background:var(--surface-2); color:var(--ink-muted);">${m.deadline}</span>
     </div>`;
   btn.addEventListener('click', () => openMasterPanel(m, key));
   return btn;
@@ -781,28 +1072,37 @@ function openMasterPanel(m, key){
   document.getElementById('panel-uni').textContent = m.uni;
   document.getElementById('panel-title').textContent = m.program;
   const gap = gapText(m);
-  const days = daysUntil(m.deadline);
+
+  const statusText = key === 'incomplete'
+    ? "Les critères de moyenne n'ont pas été trouvés sur la page officielle de ce programme — impossible de dire où tu en es. Vérifie directement sur le site."
+    : (gap ? gap : 'Tu remplis actuellement tous les critères connus pour ce Master.');
+
+  const avgBlock = m.reqAvg !== null
+    ? `<div class="criterion">
+        <div class="criterion-top"><span class="label">Moyenne académique &mdash; requis : ${m.reqLabel}</span>
+          <span class="value">${STUDENT.avg} / ${m.reqAvg}</span></div>
+        ${bar(STUDENT.avg, 100, m.reqAvg)}
+      </div>`
+    : `<div class="fact"><div class="k">Moyenne académique requise</div><div class="v" style="font-family:'Nunito Sans';font-weight:800;">${m.reqLabel}</div></div>`;
 
   const englishBlock = STUDENT.englishExempt
     ? `<div class="status-banner" style="--tone:var(--ok); --tone-bg:var(--ok-bg); margin-top:14px;">${ICONS.check}<span>Exempté(e) du test d&rsquo;anglais (cursus en anglais)</span></div>`
-    : `<div class="criterion" style="margin-top:14px;">
-        <div class="criterion-top"><span class="label">Anglais &mdash; IELTS</span>
-          <span class="value">${STUDENT.ielts.toFixed(1)} / ${m.reqIelts.toFixed(1)}</span></div>
-        ${bar(STUDENT.ielts, 9, m.reqIelts)}
-      </div>`;
+    : (m.reqIelts !== null
+      ? `<div class="criterion" style="margin-top:14px;">
+          <div class="criterion-top"><span class="label">Anglais &mdash; IELTS</span>
+            <span class="value">${STUDENT.ielts.toFixed(1)} / ${m.reqIelts.toFixed(1)}</span></div>
+          ${bar(STUDENT.ielts, 9, m.reqIelts)}
+        </div>`
+      : `<div class="fact" style="margin-top:14px;"><div class="k">Anglais requis</div><div class="v" style="font-family:'Nunito Sans';font-weight:800;">${m.englishNote}</div></div>`);
 
   document.getElementById('panel-body').innerHTML = `
     <div class="status-banner" style="--tone:${tone.color}; --tone-bg:${tone.bg};">
-      ${tone.icon}<span>${gap ? gap : 'Tu remplis actuellement tous les critères connus pour ce Master.'}</span>
+      ${tone.icon}<span>${statusText}</span>
     </div>
 
     <div>
       <div class="section-label" style="margin-bottom:10px;">Critères d&rsquo;admission</div>
-      <div class="criterion">
-        <div class="criterion-top"><span class="label">Moyenne académique &mdash; requis : ${m.reqLabel}</span>
-          <span class="value">${STUDENT.avg} / ${m.reqAvg}</span></div>
-        ${bar(STUDENT.avg, 100, m.reqAvg)}
-      </div>
+      ${avgBlock}
       ${englishBlock}
     </div>
 
@@ -813,10 +1113,10 @@ function openMasterPanel(m, key){
 
     <div class="facts">
       <div class="fact"><div class="k">Coût annuel</div><div class="v">${m.cost}</div></div>
-      <div class="fact"><div class="k">Date limite</div><div class="v">${fmtDate(m.deadline)} <span style="color:${days<=60?'var(--danger)':'var(--ink-muted)'}">(${days} j)</span></div></div>
+      <div class="fact"><div class="k">Date limite</div><div class="v" style="font-family:'Nunito Sans';font-weight:700;font-size:.82rem;">${m.deadline}</div></div>
     </div>
 
-    <a class="btn ghost tile" href="https://www.google.com/search?q=${encodeURIComponent(m.uni + ' ' + m.program + ' admission requirements')}" target="_blank" rel="noopener">Chercher la page officielle ↗</a>
+    <a class="btn ghost tile" href="https://github.com/Eurielcode/Thoquin/blob/main/docs/criteres-admission.md" target="_blank" rel="noopener">Voir la fiche source complète ↗</a>
   `;
   openPanel();
 }
