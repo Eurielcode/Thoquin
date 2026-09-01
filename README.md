@@ -39,7 +39,11 @@ Cet environnement d'exécution bloque WebFetch sur tous les domaines `.ac.uk`/`.
 - **Direction visuelle** : esthétique "chunky" façon Duolingo (boutons 3D pressable, couleurs franches, typographie ronde Baloo 2 + Nunito Sans).
 
 ### Construit
-Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](prototype/route-du-futur.html), avec 3 écrans (Mon profil/Interactive Transcript, Masters, Bourses) — **fonctionne encore sur des données d'exemple, pas les vraies données ci-dessous** (l'intégration reste à faire, voir "Pas encore fait").
+Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](prototype/route-du-futur.html), avec 3 écrans (Mon profil/Interactive Transcript, Masters, Bourses).
+
+**Le board Masters tourne maintenant sur les vraies données extraites : 93 programmes** (sur les 96 de `criteres-admission.md` — Caltech et la piste MEng EECS réservée aux internes du MIT ont été exclus, voir plus bas). Décision de design pour gérer les trous côté US sans jamais inventer de seuil : le board a **4 catégories** au lieu de 3 — Accessible / À consolider / Ambitieux / **Données incomplètes** (grise, nouvelle). Un programme tombe dans "Données incomplètes" dès que sa moyenne requise (`reqAvg`) n'a pas été trouvée sur sa page officielle ; l'IELTS manquant seul ne bloque pas un programme (`reqIelts === null` est traité comme non pénalisant, mais affiché comme "non trouvé"). Les deadlines et coûts réels étant du texte hétérogène (pas des dates ISO propres), le compte à rebours coloré a été abandonné pour les Masters et remplacé par du texte brut ; ce mécanisme reste utilisé tel quel pour la section Bourses (dates ISO propres). Le lien "fiche source" de chaque programme pointe vers `docs/criteres-admission.md` sur GitHub.
+
+Seule la section Bourses tourne encore sur des données d'exemple (Fulbright, Chevening...).
 
 Données de référence collectées :
 - [`docs/universites-cibles.md`](docs/universites-cibles.md) — 20 universités cibles (10 UK + 10 US, QS 2026 CS). Rangs 8-10 de chaque liste à confirmer.
@@ -53,9 +57,8 @@ Données de référence collectées :
 - Erreurs techniques ponctuelles : page Stanford "Master's Admissions" inaccessible (403), 2 pages MIT redirigées vers une page générique sans détail.
 
 ### Pas encore fait
-- **Compléter les "non trouvé" côté US** via une passe ciblée sur les sous-pages Admissions/Tuition/How-to-Apply.
+- **Compléter les "non trouvé" côté US** via une passe ciblée sur les sous-pages Admissions/Tuition/How-to-Apply — c'est le plus gros trou restant : la majorité des programmes US tombent dans "Données incomplètes" faute de seuil chiffré trouvé.
 - **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
-- **Intégrer `criteres-admission.md` dans le prototype** : le prototype utilise encore des données d'exemple, pas ces vraies données — il faut convertir ce tableau markdown en données structurées (JS) et les brancher sur le moteur de matching existant.
 - **1ère année (Part I)** de l'étudiant pilote : catalogue de modules encore placeholder.
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
 - **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
@@ -67,8 +70,8 @@ Données de référence collectées :
 1. ~~Identifier les 20 universités cibles~~ — fait, voir [`universites-cibles.md`](docs/universites-cibles.md).
 2. ~~Repérer les URLs des Masters~~ — fait, voir [`masters-urls.md`](docs/masters-urls.md).
 3. ~~Extraire les critères d'admission réels~~ — fait pour 96/96 programmes (beaucoup de champs "non trouvé" côté US à compléter), voir [`criteres-admission.md`](docs/criteres-admission.md).
-4. **Compléter les critères manquants côté US** (sous-pages Admissions/Tuition/How-to-Apply non couvertes en premier passage).
-5. **Brancher les vraies données sur le prototype** (remplacer les données d'exemple par `criteres-admission.md` converti en JS).
+4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur les 93 vraies fiches, avec la catégorie "Données incomplètes" pour les seuils non trouvés.
+5. **Compléter les critères manquants côté US** (sous-pages Admissions/Tuition/How-to-Apply non couvertes en premier passage) — fera reculer la catégorie "Données incomplètes".
 6. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote.
 7. Collecter les vraies bourses (critères, montants, deadlines) — même méthode que pour les Masters.
 8. Concevoir le vrai modèle de données et l'architecture backend (au-delà du prototype front-end seul).
