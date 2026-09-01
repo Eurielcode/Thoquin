@@ -41,23 +41,28 @@ Cet environnement d'exécution bloque WebFetch sur tous les domaines `.ac.uk`/`.
 ### Construit
 Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](prototype/route-du-futur.html), avec 3 écrans (Mon profil/Interactive Transcript, Masters, Bourses).
 
-**Le board Masters tourne maintenant sur les vraies données extraites : 93 programmes** (sur les 96 de `criteres-admission.md` — Caltech et la piste MEng EECS réservée aux internes du MIT ont été exclus, voir plus bas). Décision de design pour gérer les trous côté US sans jamais inventer de seuil : le board a **4 catégories** au lieu de 3 — Accessible / À consolider / Ambitieux / **Données incomplètes** (grise, nouvelle). Un programme tombe dans "Données incomplètes" dès que sa moyenne requise (`reqAvg`) n'a pas été trouvée sur sa page officielle ; l'IELTS manquant seul ne bloque pas un programme (`reqIelts === null` est traité comme non pénalisant, mais affiché comme "non trouvé"). Les deadlines et coûts réels étant du texte hétérogène (pas des dates ISO propres), le compte à rebours coloré a été abandonné pour les Masters et remplacé par du texte brut ; ce mécanisme reste utilisé tel quel pour la section Bourses (dates ISO propres). Le lien "fiche source" de chaque programme pointe vers `docs/criteres-admission.md` sur GitHub.
+**Le board Masters tourne maintenant sur les vraies données extraites : 91 programmes** (sur les 96 de `criteres-admission.md` — 5 exclus, voir plus bas). Décision de design pour gérer les trous côté US sans jamais inventer de seuil : le board a **4 catégories** au lieu de 3 — Accessible / À consolider / Ambitieux / **Données incomplètes** (grise, nouvelle). Un programme tombe dans "Données incomplètes" dès que sa moyenne requise (`reqAvg`) n'a pas été trouvée sur sa page officielle ; l'IELTS manquant seul ne bloque pas un programme (`reqIelts === null` est traité comme non pénalisant, mais affiché comme "non trouvé"). Les deadlines et coûts réels étant du texte hétérogène (pas des dates ISO propres), le compte à rebours coloré a été abandonné pour les Masters et remplacé par du texte brut ; ce mécanisme reste utilisé tel quel pour la section Bourses (dates ISO propres). Le lien "fiche source" de chaque programme pointe vers `docs/criteres-admission.md` sur GitHub.
+
+**2e passe d'extraction US terminée** (à la demande de l'utilisateur, pour économiser sa limite d'usage Claude for Chrome, la recherche a été découpée en 3 lots — A : MIT/Stanford/CMU, B : Berkeley/Georgia Tech/Princeton, C : Cornell/UIUC/Michigan — ciblés sur les pages Admissions Requirements/Tuition/Deadlines des départements, plutôt que la seule page de présentation du programme). Résultat : beaucoup de seuils GPA/IELTS/coûts/deadlines auparavant "non trouvé" sont maintenant renseignés (CMU MSAII/MCDS/MSE, Berkeley MIDS/MICS, Georgia Tech MSCS/MSA, Cornell MEng, UIUC MCS...). Le champ qui résiste le plus, même avec une recherche ciblée : **le coût annuel côté US**, souvent publié en \$/semestre sur des pages Bursar génériques non ventilées par programme (CMU, Georgia Tech, Cornell, une partie de Michigan), ou carrément derrière une authentification bloquante (page tarifs de Princeton, protégée CAS). Ces montants bruts (par semestre) sont affichés tels quels dans le prototype plutôt que d'être extrapolés en coût annuel.
+
+**5 programmes exclus du board** car confirmés non ouverts à un candidat externe : MIT MEng EECS et MIT EECS Graduate Programs en général (confirmé "no terminal master's degree" pour candidature externe directe — c'est un parcours doctoral), Caltech (le MS y est décerné en cours de PhD), UC Berkeley 5th Year MIDS (réservé aux étudiants Berkeley en 4e année). Un 6e programme, **MIT MS Computational Science and Engineering, reste affiché** mais avec un avertissement : ses admissions externes sont actuellement en pause (n'accepte que des étudiants MIT en double diplôme).
 
 Seule la section Bourses tourne encore sur des données d'exemple (Fulbright, Chevening...).
 
 Données de référence collectées :
 - [`docs/universites-cibles.md`](docs/universites-cibles.md) — 20 universités cibles (10 UK + 10 US, QS 2026 CS). Rangs 8-10 de chaque liste à confirmer.
 - [`docs/masters-urls.md`](docs/masters-urls.md) — ~96 programmes avec leurs URLs.
-- [`docs/criteres-admission.md`](docs/criteres-admission.md) — **NOUVEAU, extraction complète (96/96 programmes)** : classification/GPA, anglais requis, deadline, coût annuel, autres pièces, extraits des vraies pages via Claude for Chrome.
+- [`docs/criteres-admission.md`](docs/criteres-admission.md) — extraction complète (96/96 programmes) + **2e passe terminée sur les 37 programmes US** : classification/GPA, anglais requis, deadline, coût, autres pièces, extraits des vraies pages via Claude for Chrome.
 
 **Constats importants issus de l'extraction :**
-- **Beaucoup de champs "non trouvé", surtout côté US.** Les universités britanniques affichent en général tout sur une seule page. Les universités américaines (MIT, Stanford, CMU, Princeton, Cornell, Caltech, UIUC, Michigan, une partie de Georgia Tech) renvoient les critères chiffrés vers des sous-pages séparées ("Admissions Requirements", "Tuition and Fees", "How to Apply") non couvertes par les URLs de départ — **une passe complémentaire ciblée sur ces sous-pages est nécessaire** pour compléter les GPA/TOEFL/deadlines/coûts manquants côté US.
-- **MIT et Caltech confirmés sans master terminal ouvert aux candidats externes** (MEng EECS MIT réservé aux étudiants internes ; Caltech MS uniquement en cours de PhD).
+- **Beaucoup de champs "non trouvé" côté US, mais nettement moins qu'après la 1ère passe.** Les universités britanniques affichent en général tout sur une seule page. Les universités américaines répartissaient les critères chiffrés sur des sous-pages séparées ("Admissions Requirements", "Tuition and Fees", "How to Apply") non couvertes par les URLs de départ ; la 2e passe ciblée sur ces sous-pages a comblé une bonne partie des trous (voir ci-dessus).
+- **Ce qui résiste encore malgré la recherche ciblée** : le coût annuel pour CMU (plusieurs programmes), Georgia Tech, Princeton (page tarifs protégée par authentification CAS), Cornell, et University of Michigan CSE (erreur 403 sur la page College of Engineering) ; Georgia Tech MS Cybersecurity (sur campus) reste presque entièrement vide.
+- **5 programmes confirmés sans master terminal ouvert aux candidats externes**, désormais exclus du board (voir "Construit" ci-dessus) : MIT EECS (SM/MEng, y compris MEng), Caltech, UC Berkeley 5th Year MIDS.
 - Plusieurs deadlines UK sont déjà passées ou les candidatures sont fermées au moment de l'extraction (fin août 2026) — à revérifier à la réouverture des cycles 2027.
-- Erreurs techniques ponctuelles : page Stanford "Master's Admissions" inaccessible (403), 2 pages MIT redirigées vers une page générique sans détail.
+- Erreurs techniques ponctuelles : page Stanford "Master's Admissions" inaccessible (403 persistant même en 2e tentative).
 
 ### Pas encore fait
-- **Compléter les "non trouvé" côté US** via une passe ciblée sur les sous-pages Admissions/Tuition/How-to-Apply — c'est le plus gros trou restant : la majorité des programmes US tombent dans "Données incomplètes" faute de seuil chiffré trouvé.
+- **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — nécessiterait probablement un contact direct avec les départements plutôt qu'une recherche web, vu les pages protégées/non ventilées rencontrées.
 - **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
 - **1ère année (Part I)** de l'étudiant pilote : catalogue de modules encore placeholder.
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
@@ -69,9 +74,9 @@ Données de référence collectées :
 
 1. ~~Identifier les 20 universités cibles~~ — fait, voir [`universites-cibles.md`](docs/universites-cibles.md).
 2. ~~Repérer les URLs des Masters~~ — fait, voir [`masters-urls.md`](docs/masters-urls.md).
-3. ~~Extraire les critères d'admission réels~~ — fait pour 96/96 programmes (beaucoup de champs "non trouvé" côté US à compléter), voir [`criteres-admission.md`](docs/criteres-admission.md).
-4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur les 93 vraies fiches, avec la catégorie "Données incomplètes" pour les seuils non trouvés.
-5. **Compléter les critères manquants côté US** (sous-pages Admissions/Tuition/How-to-Apply non couvertes en premier passage) — fera reculer la catégorie "Données incomplètes".
+3. ~~Extraire les critères d'admission réels~~ — fait pour 96/96 programmes + 2e passe ciblée sur les 37 programmes US, voir [`criteres-admission.md`](docs/criteres-admission.md).
+4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur 91 vraies fiches (5 exclues, non ouvertes aux externes), avec la catégorie "Données incomplètes" pour les seuils encore non trouvés.
+5. **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — probablement par contact direct plutôt que recherche web, voir "Pas encore fait" ci-dessus.
 6. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote.
 7. Collecter les vraies bourses (critères, montants, deadlines) — même méthode que pour les Masters.
 8. Concevoir le vrai modèle de données et l'architecture backend (au-delà du prototype front-end seul).
