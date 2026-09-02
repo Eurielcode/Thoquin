@@ -65,7 +65,7 @@ Données de référence collectées :
 ### Pas encore fait
 - **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — nécessiterait probablement un contact direct avec les départements plutôt qu'une recherche web, vu les pages protégées/non ventilées rencontrées.
 - **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
-- **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
+- **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML. **Plan détaillé prêt** : voir [`docs/plan-backend.md`](docs/plan-backend.md) — stack recommandée (Supabase : Postgres + Auth + API auto-générée), modèle de données, sécurité (RLS), et étapes concrètes de migration. Pas encore implémenté.
 - **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
 - **Adoption étudiante** : réflexion produit évoquée mais pas creusée.
 - **Vérification des bourses via Claude for Chrome** : les 6 bourses de `criteres-bourses.md` viennent de WebSearch, pas d'une lecture directe des pages officielles — à re-vérifier avant une vraie candidature (deadlines et listes d'universités éligibles surtout).
@@ -78,7 +78,7 @@ Données de référence collectées :
 4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur 91 vraies fiches (5 exclues, non ouvertes aux externes), avec la catégorie "Données incomplètes" pour les seuils encore non trouvés.
 5. **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — probablement par contact direct plutôt que recherche web, voir "Pas encore fait" ci-dessus.
 6. ~~Collecter les vraies bourses~~ — fait pour 6 bourses (Chevening, Fulbright Ghana, Commonwealth, Rhodes, GREAT, Mastercard Foundation), voir [`criteres-bourses.md`](docs/criteres-bourses.md) ; à vérifier via Claude for Chrome avant usage réel.
-7. **Concevoir le vrai modèle de données et l'architecture backend** (au-delà du prototype front-end seul) — c'est la principale étape structurante qui reste, voir section 3 "Pas encore fait" pour ce qu'elle impliquerait concrètement.
+7. **Implémenter le backend** — plan détaillé écrit et prêt dans [`plan-backend.md`](docs/plan-backend.md) (stack Supabase, modèle de données, migration), reste à exécuter : c'est la principale étape structurante qui reste.
 8. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
 
 ## 5. Structure du dépôt
@@ -90,7 +90,8 @@ Données de référence collectées :
 │   ├── universites-cibles.md       # les 20 universités cibles (UK/US, Computer Science)
 │   ├── masters-urls.md             # URLs des Masters (cluster tech) par université
 │   ├── criteres-admission.md       # critères d'admission réels extraits (96/96 programmes)
-│   └── criteres-bourses.md         # 6 bourses réelles (éligibilité/couverture/deadline)
+│   ├── criteres-bourses.md         # 6 bourses réelles (éligibilité/couverture/deadline)
+│   └── plan-backend.md             # plan détaillé pour passer du prototype à une vraie appli (Supabase)
 └── prototype/
     └── route-du-futur.html         # prototype interactif (ouvrir dans un navigateur)
 ```
