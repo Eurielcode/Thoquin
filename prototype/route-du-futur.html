@@ -970,19 +970,29 @@ const MASTERS = [
     deadline:'non trouvé', other:['Pas de frais de candidature ni de GRE requis','Maîtrise de base de Python requise'] },
 ];
 
+// Données réelles trouvées via WebSearch (voir docs/criteres-bourses.md) — WebFetch est bloqué
+// même sur ces domaines .org, donc pas de lecture directe des pages ; à re-vérifier via Claude
+// for Chrome avant une vraie candidature. deadline = texte libre quand aucune date ISO propre
+// n'a été trouvée (même logique que pour les Masters).
 const SCHOLARSHIPS = [
-  { id:'fulbright', name:'Fulbright Foreign Student Program', coverage:'Financement complet (frais + logement)',
-    applies:'Tous les Masters aux États-Unis', deadline:'2026-10-15',
-    eligible:true, missing:null },
-  { id:'chevening', name:'Chevening Scholarship', coverage:'Financement complet',
-    applies:'Tous les Masters au Royaume-Uni', deadline:'2026-11-05',
-    eligible:false, missing:'2 ans d’expérience professionnelle après la licence (tu en as 0 actuellement)' },
-  { id:'lancaster-award', name:'Lancaster Global Achievers Award', coverage:'Bourse partielle &mdash; £5 000',
-    applies:'Anciens étudiants Lancaster poursuivant vers un Master partenaire', deadline:'2026-04-30',
-    eligible:true, missing:null },
-  { id:'great', name:'GREAT Scholarships', coverage:'Bourse partielle &mdash; £10 000',
-    applies:'Masters éligibles au Royaume-Uni (liste restreinte par le British Council)', deadline:'2026-02-20',
-    eligible:true, missing:null },
+  { id:'chevening', name:'Chevening Scholarship', coverage:'Financement complet (frais de scolarité, billets d’avion, allocation de subsistance mensuelle, frais annexes)',
+    applies:'Masters d’1 an éligibles au Royaume-Uni (couvre tes 10 universités cibles UK)', deadline:'2026-10-06',
+    eligible:false, missing:'2 ans d’expérience professionnelle après la fin de la licence (2 800h) + candidater à 3 cours UK et obtenir une offre inconditionnelle d’au moins un — pas encore possible en cours de licence' },
+  { id:'fulbright', name:'Fulbright Foreign Student Program (Ghana)', coverage:'Financement jusqu’à 2 ans pour un Master ou doctorat aux États-Unis',
+    applies:'Masters dans des domaines prioritaires (IA, cybersécurité, santé/digitalisation, STEM, supply chain, commerce) — une bonne partie de tes universités cibles US', deadline:'Variable selon le cycle Ghana (généralement mai-juin, date exacte non publiée — voir gh.usembassy.gov)',
+    eligible:false, missing:'⚠️ Le programme Ghana cible le personnel déjà en poste dans l’enseignement supérieur, la recherche ou une institution gouvernementale — pas les étudiants sans expérience pro dans ces secteurs ; GPA min. 3.5/4.0 ; TOEFL et GRE requis si sélectionné(e)' },
+  { id:'commonwealth', name:'Commonwealth Shared Scholarship', coverage:'Financement complet (frais de scolarité, billets d’avion, allocation)',
+    applies:'Masters éligibles au Royaume-Uni, sur une liste de cours approuvés par le CSC (à vérifier au cas par cas)', deadline:'Cycle 2026/27 fermé depuis le 9 déc. 2025 — prochain cycle 2027/28 attendu vers nov./déc. 2026, date exacte non encore publiée',
+    eligible:false, missing:'2:1 (60%) minimum requis d’ici sept. 2026 — pas encore garanti tant que Part III n’est pas terminée' },
+  { id:'rhodes', name:'Rhodes Scholarship (Afrique de l’Ouest)', coverage:'Financement complet (frais de scolarité + allocation de subsistance) pour un Master/DPhil à Oxford',
+    applies:'Uniquement University of Oxford (une de tes 10 cibles UK)', deadline:'2026-08-27',
+    eligible:false, missing:'18-24 ans à la date de clôture (à vérifier pour ton cycle) ; extrêmement compétitif — seulement 3 bourses/an pour toute l’Afrique de l’Ouest' },
+  { id:'great', name:'GREAT Scholarships (British Council)', coverage:'Minimum £10 000 pour un Master d’1 an à temps plein uniquement (2 ans/année en industrie/intégré non éligibles)',
+    applies:'Plus de 60 universités UK — Imperial College London confirmé parmi tes 10 cibles UK (liste change chaque année, voir study-uk.britishcouncil.org)', deadline:'2026-04-24',
+    eligible:false, missing:'Nécessite une offre conditionnelle acceptée pour un cours d’1 an à temps plein avant la deadline' },
+  { id:'mastercard', name:'Mastercard Foundation Scholars Program', coverage:'Financement complet, spécifique à l’université partenaire choisie',
+    applies:'Réseau décentralisé de 60+ universités partenaires — parmi tes 20 cibles, seule University of Edinburgh est confirmée partenaire (Glasgow/Michigan/UIUC non confirmés, à vérifier)', deadline:'Décentralisé — chaque université partenaire fixe sa propre deadline, vérifier directement le partenaire visé',
+    eligible:false, missing:'Critères et deadline propres à chaque université partenaire — pas de portail centralisé' },
 ];
 
 function englishOk(m){
@@ -1014,7 +1024,10 @@ function gapText(m){
   return parts.length ? 'Écart : ' + parts.join(' · ') : null;
 }
 
-// Bourses uniquement : dates ISO connues, donc compte à rebours utilisable.
+// Bourses : compte à rebours coloré uniquement quand la deadline est une date ISO propre
+// (yyyy-mm-dd) ; sinon (deadline décentralisée, cycle fermé, date non publiée...) on affiche
+// le texte brut, même logique que pour les Masters.
+function isIsoDate(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
 function daysUntil(dateStr){
   const d = new Date(dateStr + 'T00:00:00');
   const now = new Date('2026-09-01T00:00:00');
@@ -1171,7 +1184,11 @@ function renderSchol(){
   wrap.innerHTML = '';
   SCHOLARSHIPS.forEach(s => {
     const tone = s.eligible ? TONE.accessible : TONE.consolider;
-    const days = daysUntil(s.deadline);
+    const iso = isIsoDate(s.deadline);
+    const days = iso ? daysUntil(s.deadline) : null;
+    const deadlinePill = iso
+      ? `<span class="deadline-pill ${deadlineClass(days)}">${fmtDate(s.deadline)}</span>`
+      : `<span class="deadline-pill" style="background:var(--surface-2); color:var(--ink-muted);">${s.deadline}</span>`;
     const card = document.createElement('button');
     card.className = 'schol-card tile';
     card.style.setProperty('--tone-b', tone.border);
@@ -1182,7 +1199,7 @@ function renderSchol(){
         <div class="status-line" style="--tone:${tone.color};">${s.eligible ? ICONS.check + ' Éligible' : ICONS.bolt + ' ' + s.missing}</div>
         <div class="schol-meta">Couverture : ${s.coverage}</div>
         <div class="schol-meta">S&rsquo;applique à : ${s.applies}</div>
-        <div class="schol-foot"><span class="deadline-pill ${deadlineClass(days)}">${fmtDate(s.deadline)}</span></div>
+        <div class="schol-foot">${deadlinePill}</div>
       </div>`;
     card.addEventListener('click', () => openScholPanel(s, tone, days));
     wrap.appendChild(card);
@@ -1192,18 +1209,22 @@ function renderSchol(){
 function openScholPanel(s, tone, days){
   document.getElementById('panel-uni').textContent = 'Bourse';
   document.getElementById('panel-title').textContent = s.name;
+  const deadlineValue = days !== null
+    ? `${fmtDate(s.deadline)} <span style="color:${days<=60?'var(--danger)':'var(--ink-muted)'}">(${days} j)</span>`
+    : `<span style="font-family:'Nunito Sans';font-weight:700;font-size:.82rem;">${s.deadline}</span>`;
   document.getElementById('panel-body').innerHTML = `
     <div class="status-banner" style="--tone:${tone.color}; --tone-bg:${tone.bg};">
       ${tone.icon}<span>${s.eligible ? 'Tu remplis actuellement tous les critères connus pour cette bourse.' : 'Il te manque : ' + s.missing}</span>
     </div>
     <div class="facts">
       <div class="fact"><div class="k">Couverture</div><div class="v" style="font-family:'Nunito Sans';font-weight:800;">${s.coverage}</div></div>
-      <div class="fact"><div class="k">Date limite</div><div class="v">${fmtDate(s.deadline)} <span style="color:${days<=60?'var(--danger)':'var(--ink-muted)'}">(${days} j)</span></div></div>
+      <div class="fact"><div class="k">Date limite</div><div class="v">${deadlineValue}</div></div>
     </div>
     <div>
       <div class="section-label" style="margin-bottom:8px;">Programmes concernés</div>
       <p style="font-size:.88rem; font-weight:700; margin:0;">${s.applies}</p>
     </div>
+    <a class="btn ghost tile" href="https://github.com/Eurielcode/Thoquin/blob/main/docs/criteres-bourses.md" target="_blank" rel="noopener">Voir la fiche source complète ↗</a>
   `;
   openPanel();
 }

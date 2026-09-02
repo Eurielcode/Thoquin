@@ -47,12 +47,13 @@ Un prototype HTML/JS interactif est dans [`prototype/route-du-futur.html`](proto
 
 **5 programmes exclus du board** car confirmés non ouverts à un candidat externe : MIT MEng EECS et MIT EECS Graduate Programs en général (confirmé "no terminal master's degree" pour candidature externe directe — c'est un parcours doctoral), Caltech (le MS y est décerné en cours de PhD), UC Berkeley 5th Year MIDS (réservé aux étudiants Berkeley en 4e année). Un 6e programme, **MIT MS Computational Science and Engineering, reste affiché** mais avec un avertissement : ses admissions externes sont actuellement en pause (n'accepte que des étudiants MIT en double diplôme).
 
-Seule la section Bourses tourne encore sur des données d'exemple (Fulbright, Chevening...).
+**La section Bourses tourne maintenant sur 6 vraies bourses** (Chevening, Fulbright Ghana, Commonwealth Shared Scholarship, Rhodes Scholarship Afrique de l'Ouest, GREAT Scholarships, Mastercard Foundation Scholars Program) au lieu des données d'exemple d'origine. Trouvaille importante au passage : la "Lancaster Global Achievers Award" des données d'exemple était fictive — la vraie bourse Lancaster (Alumni Loyalty Scholarship, 10% de réduction) existe bien mais ne s'applique qu'à un Master **à Lancaster elle-même**, pas aux 20 universités cibles du projet, donc écartée du board. Ces données viennent de WebSearch (pas de lecture directe de page, voir section 6) et sont donc marquées comme moins vérifiées que celles des Masters — un lien "fiche source" pointe vers `docs/criteres-bourses.md`. Les deadlines non-ISO (bourse décentralisée, cycle fermé, date non publiée) s'affichent en texte brut comme pour les Masters, plutôt que de forcer une fausse date.
 
 Données de référence collectées :
 - [`docs/universites-cibles.md`](docs/universites-cibles.md) — 20 universités cibles (10 UK + 10 US, QS 2026 CS). Rangs 8-10 de chaque liste à confirmer.
 - [`docs/masters-urls.md`](docs/masters-urls.md) — ~96 programmes avec leurs URLs.
 - [`docs/criteres-admission.md`](docs/criteres-admission.md) — extraction complète (96/96 programmes) + **2e passe terminée sur les 37 programmes US** : classification/GPA, anglais requis, deadline, coût, autres pièces, extraits des vraies pages via Claude for Chrome.
+- [`docs/criteres-bourses.md`](docs/criteres-bourses.md) — **NOUVEAU**, 6 bourses réelles avec éligibilité/couverture/deadline, trouvées via WebSearch (méthode différente de celle des Masters, voir section 6).
 
 **Constats importants issus de l'extraction :**
 - **Beaucoup de champs "non trouvé" côté US, mais nettement moins qu'après la 1ère passe.** Les universités britanniques affichent en général tout sur une seule page. Les universités américaines répartissaient les critères chiffrés sur des sous-pages séparées ("Admissions Requirements", "Tuition and Fees", "How to Apply") non couvertes par les URLs de départ ; la 2e passe ciblée sur ces sous-pages a comblé une bonne partie des trous (voir ci-dessus).
@@ -68,7 +69,7 @@ Données de référence collectées :
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
 - **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
 - **Adoption étudiante** : réflexion produit évoquée mais pas creusée.
-- **Bourses réelles** : toujours des données d'exemple (Fulbright, Chevening...), pas encore de vraie collecte de critères de bourses.
+- **Vérification des bourses via Claude for Chrome** : les 6 bourses de `criteres-bourses.md` viennent de WebSearch, pas d'une lecture directe des pages officielles — à re-vérifier avant une vraie candidature (deadlines et listes d'universités éligibles surtout).
 
 ## 4. Prochaines étapes proposées
 
@@ -78,7 +79,7 @@ Données de référence collectées :
 4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur 91 vraies fiches (5 exclues, non ouvertes aux externes), avec la catégorie "Données incomplètes" pour les seuils encore non trouvés.
 5. **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — probablement par contact direct plutôt que recherche web, voir "Pas encore fait" ci-dessus.
 6. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote.
-7. Collecter les vraies bourses (critères, montants, deadlines) — même méthode que pour les Masters.
+7. ~~Collecter les vraies bourses~~ — fait pour 6 bourses (Chevening, Fulbright Ghana, Commonwealth, Rhodes, GREAT, Mastercard Foundation), voir [`criteres-bourses.md`](docs/criteres-bourses.md) ; à vérifier via Claude for Chrome avant usage réel.
 8. Concevoir le vrai modèle de données et l'architecture backend (au-delà du prototype front-end seul).
 9. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
 
@@ -90,7 +91,8 @@ Données de référence collectées :
 │   ├── cahier-des-charges.md       # spécification initiale du projet
 │   ├── universites-cibles.md       # les 20 universités cibles (UK/US, Computer Science)
 │   ├── masters-urls.md             # URLs des Masters (cluster tech) par université
-│   └── criteres-admission.md       # critères d'admission réels extraits (96/96 programmes)
+│   ├── criteres-admission.md       # critères d'admission réels extraits (96/96 programmes)
+│   └── criteres-bourses.md         # 6 bourses réelles (éligibilité/couverture/deadline)
 └── prototype/
     └── route-du-futur.html         # prototype interactif (ouvrir dans un navigateur)
 ```
@@ -100,6 +102,7 @@ Données de référence collectées :
 Lis ce README en entier avant de proposer quoi que ce soit. Le prototype HTML est autonome (pas de dépendances) : ouvre-le directement dans un navigateur. Après toute modification significative, mets à jour la section 3 de ce README avant de terminer la session.
 
 **Points d'attention technique confirmés (ne pas re-tester) :**
-- WebFetch est bloqué (EGRESS_BLOCKED) pour tous les domaines `.ac.uk`/`.edu` testés dans cet environnement — testé sur 8+ universités, échec systématique.
-- **Solution qui fonctionne** : demander à l'utilisateur d'utiliser Claude for Chrome (extension navigateur, tourne sur son propre réseau, sans ce blocage) pour visiter les pages et coller le résultat en texte ici. C'est comme ça que `criteres-admission.md` a été rempli.
+- WebFetch est bloqué (EGRESS_BLOCKED) dans cet environnement — **pas seulement sur `.ac.uk`/`.edu`** comme supposé au départ : confirmé aussi sur des domaines `.org`/`.gov` (chevening.org, fulbrightonline.org, mastercardfdn.org, cscuk.fcdo.gov.uk). Le blocage semble large, pas limité aux domaines universitaires.
+- **WebSearch fonctionne, lui, et peut suffire pour des données moins critiques** : contrairement à WebFetch, WebSearch (recherche + résumé, pas de lecture directe de page) n'est pas bloqué. Utilisé avec succès pour : (1) des coûts US manquants côté Masters — mais attention, ces résultats viennent souvent d'agrégateurs tiers non officiels (Yocket, Collegedunia...), à marquer explicitement "estimation non officielle" ; (2) les 6 bourses de `criteres-bourses.md` — là les résumés citent des pages officielles (chevening.org, cscuk.fcdo.gov.uk...) donc plus fiables, mais toujours pas une lecture mot-à-mot. Bien vérifier la provenance (officielle vs agrégateur) avant de décider du niveau de confiance à afficher.
+- **Pour une extraction fiable/complète, Claude for Chrome reste la meilleure solution** (extension navigateur, tourne sur le réseau de l'utilisateur, sans ce blocage) : demander à l'utilisateur de visiter les pages et coller le résultat en texte ici. C'est comme ça que `criteres-admission.md` a été rempli à l'origine.
 - Attention en cas de reprise après une longue pause utilisateur ("j'ai atteint ma limite d'usage") : vérifier si le message concerne bien cette session-ci ou une autre session Claude en parallèle (Claude for Chrome notamment) — ça a déjà causé une confusion.
