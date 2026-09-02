@@ -75,13 +75,15 @@ Le moteur de matching (`classify()`, `gapText()`...) reste **côté client, en J
 
 1. ~~Écrire le schéma des tables + policies RLS~~ — fait, voir [`db/schema.sql`](../db/schema.sql).
 2. ~~Générer les données réelles à insérer~~ — fait, voir [`db/seed.sql`](../db/seed.sql) (généré par [`db/generate-seed.js`](../db/generate-seed.js)).
-3. **Créer un projet Supabase (gratuit)** — étape manuelle, nécessite un compte (voir "Ce qu'il reste à faire toi-même" ci-dessous).
-4. Exécuter `db/schema.sql` puis `db/seed.sql` dans l'éditeur SQL du projet Supabase.
-5. Activer l'authentification par email (lien magique) dans Supabase.
-6. Modifier `prototype/route-du-futur.html` : écran de connexion, chargement des données via l'API au lieu des tableaux en dur, sauvegarde des notes en base. (Cette étape a besoin de l'URL et de la clé publique du projet Supabase créé à l'étape 3 — donc après.)
-7. Héberger le front-end statiquement (GitHub Pages ou Vercel, gratuit) — Supabase héberge déjà la base et l'API, rien à gérer côté serveur.
+3. ~~Créer un projet Supabase~~ — fait par l'utilisateur (projet `iihevbisbccnurjxgxbn`).
+4. **À confirmer** : `db/schema.sql` puis `db/seed.sql` exécutés dans l'éditeur SQL du projet — pas vérifiable depuis cette session (réseau sortant bloqué), à vérifier visuellement dans le Table Editor Supabase si le prototype affiche un board vide.
+5. Authentification par email : normalement active par défaut sur un nouveau projet Supabase, à vérifier une fois testé.
+6. ~~Modifier `prototype/route-du-futur.html`~~ — fait : écran de connexion par lien magique, chargement de `MASTERS`/`SCHOLARSHIPS` via l'API Supabase au lieu des tableaux en dur, profil et notes lus/sauvegardés en base (`students`/`student_modules`/`student_components`), bouton de déconnexion. Au tout premier login, la structure `DEFAULT_PART2_YEARS` (l'ancien contenu codé en dur) est copiée automatiquement dans Supabase pour ce compte.
+7. **Héberger le front-end statiquement** (GitHub Pages ou Vercel) — **obligatoire pour tester**, contrairement à l'Artifact claude.ai qui bloque les appels réseau externes (voir encadré ci-dessous).
 8. Tester avec ton propre compte, puis avec 1-2 autres étudiants Lancaster CS pour valider que chacun voit bien uniquement ses propres notes.
 9. (Plus tard) Mettre à jour les données Masters/Bourses directement dans les tables Supabase chaque année, sans toucher au code du front-end (ou relancer `db/generate-seed.js` puis réexécuter le nouveau `seed.sql`).
+
+> **Important — pourquoi le lien Artifact claude.ai ne suffit plus** : les pages publiées comme Artifact sur claude.ai tournent dans un bac à sable qui bloque les appels réseau (fetch/XHR) vers des services externes comme Supabase, par sécurité. Le prototype connecté à Supabase doit être ouvert via un vrai hébergement (GitHub Pages, Vercel, ou même en local dans un navigateur) pour fonctionner — l'Artifact reste utile pour prévisualiser le design, mais plus pour tester la connexion et l'authentification réelles.
 
 ### Ce qu'il reste à faire toi-même (étape 3)
 
