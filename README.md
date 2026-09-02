@@ -65,7 +65,7 @@ Données de référence collectées :
 ### Pas encore fait
 - **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — nécessiterait probablement un contact direct avec les départements plutôt qu'une recherche web, vu les pages protégées/non ventilées rencontrées.
 - **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
-- **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML. **Plan détaillé prêt** : voir [`docs/plan-backend.md`](docs/plan-backend.md) — stack recommandée (Supabase : Postgres + Auth + API auto-générée), modèle de données, sécurité (RLS), et étapes concrètes de migration. Pas encore implémenté.
+- **Backend en cours** : le schéma SQL ([`db/schema.sql`](db/schema.sql)) et les données réelles prêtes à insérer ([`db/seed.sql`](db/seed.sql), généré par [`db/generate-seed.js`](db/generate-seed.js) — 91 Masters, 6 bourses, 19 universités) sont écrits et versionnés. **Bloqué sur une étape manuelle** : créer le projet Supabase lui-même nécessite une inscription externe (voir [`docs/plan-backend.md`](docs/plan-backend.md), section "Ce qu'il reste à faire toi-même") — une fois l'URL et la clé `anon` du projet fournies, le prototype peut être branché dessus (écran de connexion, chargement des données via l'API, sauvegarde des notes).
 - **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
 - **Adoption étudiante** : réflexion produit évoquée mais pas creusée.
 - **Vérification des bourses via Claude for Chrome** : les 6 bourses de `criteres-bourses.md` viennent de WebSearch, pas d'une lecture directe des pages officielles — à re-vérifier avant une vraie candidature (deadlines et listes d'universités éligibles surtout).
@@ -78,7 +78,7 @@ Données de référence collectées :
 4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur 91 vraies fiches (5 exclues, non ouvertes aux externes), avec la catégorie "Données incomplètes" pour les seuils encore non trouvés.
 5. **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — probablement par contact direct plutôt que recherche web, voir "Pas encore fait" ci-dessus.
 6. ~~Collecter les vraies bourses~~ — fait pour 6 bourses (Chevening, Fulbright Ghana, Commonwealth, Rhodes, GREAT, Mastercard Foundation), voir [`criteres-bourses.md`](docs/criteres-bourses.md) ; à vérifier via Claude for Chrome avant usage réel.
-7. **Implémenter le backend** — plan détaillé écrit et prêt dans [`plan-backend.md`](docs/plan-backend.md) (stack Supabase, modèle de données, migration), reste à exécuter : c'est la principale étape structurante qui reste.
+7. **Implémenter le backend** — schéma et données prêts ([`db/schema.sql`](db/schema.sql), [`db/seed.sql`](db/seed.sql)) ; **bloqué sur la création manuelle du projet Supabase** (inscription externe, voir [`plan-backend.md`](docs/plan-backend.md)) avant de pouvoir brancher le prototype dessus.
 8. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
 
 ## 5. Structure du dépôt
@@ -92,6 +92,10 @@ Données de référence collectées :
 │   ├── criteres-admission.md       # critères d'admission réels extraits (96/96 programmes)
 │   ├── criteres-bourses.md         # 6 bourses réelles (éligibilité/couverture/deadline)
 │   └── plan-backend.md             # plan détaillé pour passer du prototype à une vraie appli (Supabase)
+├── db/
+│   ├── schema.sql                  # tables Postgres + policies RLS (à exécuter dans Supabase)
+│   ├── seed.sql                    # données réelles prêtes à insérer (généré, ne pas éditer à la main)
+│   └── generate-seed.js            # régénère seed.sql depuis le prototype (node db/generate-seed.js)
 └── prototype/
     └── route-du-futur.html         # prototype interactif (ouvrir dans un navigateur)
 ```
