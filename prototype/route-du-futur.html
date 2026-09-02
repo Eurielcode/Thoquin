@@ -286,15 +286,6 @@
     background:var(--surface); color:var(--ink);
   }
 
-  .part-switch{ display:inline-flex; gap:8px; margin-bottom:16px; }
-  .part-switch button{
-    appearance:none; background:var(--surface); color:var(--ink-muted);
-    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.86rem;
-    padding:8px 18px; border-radius:12px; border:2px solid var(--line); border-bottom-width:4px; cursor:pointer;
-  }
-  .part-switch button.active{ background:var(--stretch); color:#fff; border-color:var(--stretch-b); }
-  .part-switch button:active{ transform:translateY(2px); border-bottom-width:2px; }
-
   .year-group-label{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.92rem; color:var(--ink-muted); margin:20px 2px 8px; }
   .year-group-label:first-child{ margin-top:0; }
 
@@ -400,7 +391,6 @@
       </div>
     </div>
 
-    <div class="part-switch" id="part-switch"></div>
     <div class="module-list" id="module-list"></div>
   </section>
 
@@ -436,17 +426,6 @@ const ICONS = {
   trophy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M7 5H4v1a4 4 0 0 0 3 3.87M17 5h3v1a4 4 0 0 1-3 3.87" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 13v3m-3 3h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
   lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2"/></svg>',
 };
-
-// Part I : catalogue illustratif (année pas encore transmise) — structure générique à 2 composantes,
-// vide par défaut : sert à montrer comment une année "en cours" se remplit note par note.
-const PART1_MODULES = [
-  { code:'SCC.100', name:'Digital Systems', credits:15, components:[{name:'Coursework',weight:40,mark:null},{name:'Exam',weight:60,mark:null}] },
-  { code:'SCC.110', name:'Software Development', credits:15, components:[{name:'Coursework',weight:50,mark:null},{name:'Exam',weight:50,mark:null}] },
-  { code:'SCC.121', name:'Introduction to Programming', credits:15, components:[{name:'Coursework',weight:40,mark:null},{name:'Exam',weight:60,mark:null}] },
-  { code:'SCC.130', name:'Web Technologies', credits:15, components:[{name:'Coursework',weight:60,mark:null},{name:'Exam',weight:40,mark:null}] },
-  { code:'SCC.160', name:'Data Structures & Algorithms', credits:15, components:[{name:'Coursework',weight:30,mark:null},{name:'Exam',weight:70,mark:null}] },
-  { code:'SCC.170', name:'Mathematics for Computer Scientists', credits:15, components:[{name:'Coursework',weight:20,mark:null},{name:'Exam',weight:80,mark:null}] },
-];
 
 // Part II : repris de ton relevé interactif Lancaster (Ghana). Année 2 : composantes déjà reçues
 // (pondération Coursework/Exam déduite de tes marks réels). Année 3 : le département n'a pas encore
@@ -540,33 +519,17 @@ function recomputeStudent(){
   renderBoard();
 }
 
-let activePart = 'II';
-
 function renderProfile(){
-  const switchWrap = document.getElementById('part-switch');
-  switchWrap.innerHTML = '';
-  ['I','II'].forEach(p => {
-    const b = document.createElement('button');
-    b.textContent = `Part ${p} Transcript`;
-    b.className = p === activePart ? 'active' : '';
-    b.addEventListener('click', () => { activePart = p; renderProfile(); });
-    switchWrap.appendChild(b);
-  });
-
   const list = document.getElementById('module-list');
   list.innerHTML = '';
 
-  if (activePart === 'I') {
-    PART1_MODULES.forEach(mod => list.appendChild(renderModuleCard(mod)));
-  } else {
-    Object.entries(PART2_YEARS).forEach(([y, data]) => {
-      const label = document.createElement('div');
-      label.className = 'year-group-label';
-      label.textContent = `Année ${y} — ${data.label}`;
-      list.appendChild(label);
-      data.modules.forEach(mod => list.appendChild(renderModuleCard(mod)));
-    });
-  }
+  Object.entries(PART2_YEARS).forEach(([y, data]) => {
+    const label = document.createElement('div');
+    label.className = 'year-group-label';
+    label.textContent = `Année ${y} — ${data.label}`;
+    list.appendChild(label);
+    data.modules.forEach(mod => list.appendChild(renderModuleCard(mod)));
+  });
 }
 
 function renderModuleCard(mod){

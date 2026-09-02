@@ -65,7 +65,6 @@ Données de référence collectées :
 ### Pas encore fait
 - **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — nécessiterait probablement un contact direct avec les départements plutôt qu'une recherche web, vu les pages protégées/non ventilées rencontrées.
 - **Vérification finale de la liste des 20 universités** : confirmer les rangs 8-10 UK/US sur topuniversités.com.
-- **1ère année (Part I)** de l'étudiant pilote : catalogue de modules encore placeholder.
 - **Pas de vrai backend** : ni base de données, ni authentification, ni API — tout tourne côté client dans un seul fichier HTML.
 - **Pondération Coursework/Exam** du prototype : approximative, pas la formule officielle exacte de Lancaster.
 - **Adoption étudiante** : réflexion produit évoquée mais pas creusée.
@@ -78,10 +77,9 @@ Données de référence collectées :
 3. ~~Extraire les critères d'admission réels~~ — fait pour 96/96 programmes + 2e passe ciblée sur les 37 programmes US, voir [`criteres-admission.md`](docs/criteres-admission.md).
 4. ~~Brancher les vraies données sur le prototype~~ — fait : le board Masters tourne sur 91 vraies fiches (5 exclues, non ouvertes aux externes), avec la catégorie "Données incomplètes" pour les seuils encore non trouvés.
 5. **Combler les derniers trous de coût US** (CMU, Georgia Tech, Princeton, Cornell, Michigan CSE) — probablement par contact direct plutôt que recherche web, voir "Pas encore fait" ci-dessus.
-6. Obtenir les vraies données de 1ère année (Part I) de l'étudiant pilote.
-7. ~~Collecter les vraies bourses~~ — fait pour 6 bourses (Chevening, Fulbright Ghana, Commonwealth, Rhodes, GREAT, Mastercard Foundation), voir [`criteres-bourses.md`](docs/criteres-bourses.md) ; à vérifier via Claude for Chrome avant usage réel.
-8. Concevoir le vrai modèle de données et l'architecture backend (au-delà du prototype front-end seul).
-9. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
+6. ~~Collecter les vraies bourses~~ — fait pour 6 bourses (Chevening, Fulbright Ghana, Commonwealth, Rhodes, GREAT, Mastercard Foundation), voir [`criteres-bourses.md`](docs/criteres-bourses.md) ; à vérifier via Claude for Chrome avant usage réel.
+7. **Concevoir le vrai modèle de données et l'architecture backend** (au-delà du prototype front-end seul) — c'est la principale étape structurante qui reste, voir section 3 "Pas encore fait" pour ce qu'elle impliquerait concrètement.
+8. Recruter un ou plusieurs étudiants Lancaster CS testeurs.
 
 ## 5. Structure du dépôt
 
